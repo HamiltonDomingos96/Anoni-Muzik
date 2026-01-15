@@ -5,21 +5,12 @@ import { Song } from '../types';
 interface MusicCardProps {
   song: Song;
   onPlay: (song: Song) => void;
+  onDownload: () => void;
   isCurrent: boolean;
   isPlaying: boolean;
 }
 
-const MusicCard: React.FC<MusicCardProps> = ({ song, onPlay, isCurrent, isPlaying }) => {
-  const handleDownload = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const link = document.createElement('a');
-    link.href = song.audioUrl;
-    link.download = `${song.artist} - ${song.title}.mp3`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
+const MusicCard: React.FC<MusicCardProps> = ({ song, onPlay, onDownload, isCurrent, isPlaying }) => {
   return (
     <div 
       className={`group relative p-4 rounded-xl transition-all duration-300 cursor-pointer ${
@@ -33,7 +24,6 @@ const MusicCard: React.FC<MusicCardProps> = ({ song, onPlay, isCurrent, isPlayin
           alt={song.title} 
           className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
         />
-        {/* Play button container - always centered via flex */}
         <div className={`absolute inset-0 flex items-center justify-center bg-black/40 transition-opacity duration-300 ${
           isCurrent && isPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
         }`}>
@@ -57,7 +47,7 @@ const MusicCard: React.FC<MusicCardProps> = ({ song, onPlay, isCurrent, isPlayin
           <p className="text-sm text-slate-400 truncate">{song.artist}</p>
         </div>
         <button 
-          onClick={handleDownload}
+          onClick={(e) => { e.stopPropagation(); onDownload(); }}
           className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-full transition-colors flex-shrink-0"
           title="Baixar MP3"
         >

@@ -1,5 +1,5 @@
 
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Song } from '../types';
 
 interface PlayerProps {
@@ -8,9 +8,10 @@ interface PlayerProps {
   onTogglePlay: () => void;
   onNext: () => void;
   onPrev: () => void;
+  onDownload?: () => void;
 }
 
-const Player: React.FC<PlayerProps> = ({ song, isPlaying, onTogglePlay, onNext, onPrev }) => {
+const Player: React.FC<PlayerProps> = ({ song, isPlaying, onTogglePlay, onNext, onPrev, onDownload }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -58,7 +59,6 @@ const Player: React.FC<PlayerProps> = ({ song, isPlaying, onTogglePlay, onNext, 
       />
       
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-        {/* Song Info */}
         <div className="flex items-center gap-4 w-full md:w-1/3">
           <img src={song.coverUrl} alt={song.title} className="w-12 h-12 rounded shadow-lg object-cover" />
           <div className="overflow-hidden">
@@ -67,7 +67,6 @@ const Player: React.FC<PlayerProps> = ({ song, isPlaying, onTogglePlay, onNext, 
           </div>
         </div>
 
-        {/* Controls */}
         <div className="flex flex-col items-center gap-2 w-full md:w-1/3">
           <div className="flex items-center gap-6">
             <button onClick={onPrev} className="text-slate-400 hover:text-white transition-colors">
@@ -102,15 +101,9 @@ const Player: React.FC<PlayerProps> = ({ song, isPlaying, onTogglePlay, onNext, 
           </div>
         </div>
 
-        {/* Volume / Extra - Hidden on mobile for space */}
         <div className="hidden md:flex items-center justify-end gap-4 w-1/3">
           <button 
-            onClick={() => {
-                const link = document.createElement('a');
-                link.href = song.audioUrl;
-                link.download = `${song.title}.mp3`;
-                link.click();
-            }}
+            onClick={onDownload}
             className="flex items-center gap-2 text-sm bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-full transition-colors text-slate-200"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

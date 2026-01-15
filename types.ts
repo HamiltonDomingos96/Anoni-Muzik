@@ -7,6 +7,8 @@ export interface Song {
   audioUrl: string;
   duration: string;
   genre: string;
+  plays: number;
+  downloads: number;
 }
 
 export interface SiteSettings {
