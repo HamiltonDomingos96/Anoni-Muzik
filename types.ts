@@ -9,6 +9,14 @@ export interface Song {
   genre: string;
 }
 
+export interface SiteSettings {
+  siteName: string;
+  heroTitle: string;
+  heroSubtitle: string;
+  heroImageUrl: string;
+  accentColor: string;
+}
+
 export interface PlayerState {
   currentSong: Song | null;
   isPlaying: boolean;

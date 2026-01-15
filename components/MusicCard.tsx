@@ -33,27 +33,32 @@ const MusicCard: React.FC<MusicCardProps> = ({ song, onPlay, isCurrent, isPlayin
           alt={song.title} 
           className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
         />
-        <div className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity ${
+        {/* Play button container - always centered via flex */}
+        <div className={`absolute inset-0 flex items-center justify-center bg-black/40 transition-opacity duration-300 ${
           isCurrent && isPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
         }`}>
-          <div className="w-12 h-12 bg-indigo-500 rounded-full flex items-center justify-center shadow-lg">
+          <div className="w-14 h-14 bg-indigo-500 rounded-full flex items-center justify-center shadow-2xl transform transition-transform group-hover:scale-110 active:scale-95">
             {isCurrent && isPlaying ? (
-               <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+               <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                 <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+               </svg>
             ) : (
-               <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+               <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                 <path d="M8 5v14l11-7z"/>
+               </svg>
             )}
           </div>
         </div>
       </div>
       
       <div className="flex justify-between items-start">
-        <div>
-          <h3 className="font-semibold text-slate-100 truncate w-32 md:w-40">{song.title}</h3>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-slate-100 truncate pr-2">{song.title}</h3>
           <p className="text-sm text-slate-400 truncate">{song.artist}</p>
         </div>
         <button 
           onClick={handleDownload}
-          className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-full transition-colors"
+          className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-full transition-colors flex-shrink-0"
           title="Baixar MP3"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

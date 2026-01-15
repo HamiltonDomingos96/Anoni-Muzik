@@ -3,6 +3,15 @@ import { Song } from './types';
 
 export const MOCK_SONGS: Song[] = [
   {
+    id: 'caudilho-1',
+    title: 'Zigue-Zague',
+    artist: 'Caudilho',
+    coverUrl: 'https://picsum.photos/seed/caudilho/400/400',
+    audioUrl: 'https://www.dropbox.com/scl/fi/btmkl8am8vnpx7mjqz8ho/Caudilho_-_Zigue-Zague.mp3?rlkey=d4v04sywwu7yfrw9wlskv3kmw&st=x2ukz77p&dl=1',
+    duration: '3:45',
+    genre: 'Regional'
+  },
+  {
     id: '1',
     title: 'Neon Nights',
     artist: 'Cyber Dreamer',
