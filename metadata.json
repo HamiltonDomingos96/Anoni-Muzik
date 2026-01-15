@@ -1,0 +1,7 @@
+{
+  "name": "Anoni Muzik",
+  "description": "Uma plataforma moderna de distribuição e descoberta de música, com foco em simplicidade e acessibilidade.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
