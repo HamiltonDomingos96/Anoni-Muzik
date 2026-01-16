@@ -38,8 +38,6 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
   };
 
   const shareOnFacebook = (song: Song) => {
-    // Note: In a real app, this would be the actual song URL. 
-    // Since this is a SPA, we use the site URL or a placeholder.
     const shareUrl = encodeURIComponent(window.location.href);
     const text = encodeURIComponent(`Ouve agora: ${song.title} - ${song.artist} no ${settings.siteName}!`);
     const fbShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}&quote=${text}`;
@@ -225,15 +223,15 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
                           <div className="flex justify-end items-center gap-2">
                             <button 
                               onClick={() => shareOnFacebook(song)} 
-                              className="w-8 h-8 rounded-lg bg-blue-900/20 text-blue-500 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all"
-                              title="Publicar no Facebook"
+                              className="w-9 h-9 rounded-xl bg-blue-600/10 text-blue-500 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all transform hover:scale-110 shadow-lg shadow-blue-600/10"
+                              title="Partilhar no Facebook"
                             >
                               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z" />
                               </svg>
                             </button>
-                            <button onClick={() => handleEditClick(song)} className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-blue-500/20 hover:text-blue-400"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></button>
-                            <button onClick={() => removeSong(song.id)} className="w-8 h-8 rounded-lg bg-red-900/20 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                            <button onClick={() => handleEditClick(song)} className="w-9 h-9 rounded-xl bg-slate-800 text-slate-400 flex items-center justify-center hover:bg-blue-500/20 hover:text-blue-400 transition-all"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></button>
+                            <button onClick={() => removeSong(song.id)} className="w-9 h-9 rounded-xl bg-red-900/20 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                           </div>
                         </td>
                       </tr>

@@ -12,6 +12,15 @@ interface MusicCardProps {
 }
 
 const MusicCard: React.FC<MusicCardProps> = ({ song, onPlay, onDownload, isCurrent, isPlaying, isFeatured }) => {
+  
+  const handleShare = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const shareUrl = encodeURIComponent(window.location.href);
+    const text = encodeURIComponent(`Ouve agora: ${song.title} - ${song.artist} no Anoni Muzik!`);
+    const fbShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}&quote=${text}`;
+    window.open(fbShareUrl, '_blank', 'width=600,height=400');
+  };
+
   return (
     <div 
       className={`group relative transition-all duration-500 cursor-pointer overflow-hidden ${
@@ -72,20 +81,31 @@ const MusicCard: React.FC<MusicCardProps> = ({ song, onPlay, onDownload, isCurre
         )}
       </div>
       
-      <div className="flex justify-between items-center px-0.5 md:px-1">
+      <div className="flex justify-between items-center px-0.5 md:px-1 gap-2">
         <div className="flex-1 min-w-0">
-          <h3 className={`font-black text-white truncate tracking-tight uppercase leading-tight ${isFeatured ? 'text-base md:text-xl' : 'text-xs md:text-base'}`}>{song.title}</h3>
+          <h3 className={`font-black text-white truncate tracking-tight uppercase leading-tight ${isFeatured ? 'text-sm md:text-lg' : 'text-xs md:text-sm'}`}>{song.title}</h3>
           <p className="text-[8px] md:text-[10px] text-slate-500 font-bold truncate uppercase tracking-widest mt-0.5">{song.artist}</p>
         </div>
-        <button 
-          onClick={(e) => { e.stopPropagation(); onDownload(); }}
-          className="ml-2 md:ml-4 p-2 md:p-3 bg-white/5 text-slate-400 hover:text-black hover:bg-amber-500 rounded-lg md:rounded-xl transition-all active:scale-90"
-          title="Baixar MP3"
-        >
-          <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-          </svg>
-        </button>
+        <div className="flex items-center gap-1.5">
+          <button 
+            onClick={handleShare}
+            className="p-1.5 md:p-2 bg-blue-600/10 text-blue-500 hover:text-white hover:bg-blue-600 rounded-lg transition-all active:scale-90"
+            title="Partilhar no Facebook"
+          >
+            <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z" />
+            </svg>
+          </button>
+          <button 
+            onClick={(e) => { e.stopPropagation(); onDownload(); }}
+            className="p-1.5 md:p-2 bg-white/5 text-slate-400 hover:text-black hover:bg-amber-500 rounded-lg transition-all active:scale-90"
+            title="Baixar MP3"
+          >
+            <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
   );
