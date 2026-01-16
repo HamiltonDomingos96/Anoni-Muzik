@@ -6,12 +6,13 @@ interface MusicCardProps {
   song: Song;
   onPlay: (song: Song) => void;
   onDownload: () => void;
+  onLike: () => void;
   isCurrent: boolean;
   isPlaying: boolean;
   isFeatured?: boolean;
 }
 
-const MusicCard: React.FC<MusicCardProps> = ({ song, onPlay, onDownload, isCurrent, isPlaying, isFeatured }) => {
+const MusicCard: React.FC<MusicCardProps> = ({ song, onPlay, onDownload, onLike, isCurrent, isPlaying, isFeatured }) => {
   
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -19,6 +20,11 @@ const MusicCard: React.FC<MusicCardProps> = ({ song, onPlay, onDownload, isCurre
     const text = encodeURIComponent(`Ouve agora: ${song.title} - ${song.artist} no Anoni Muzik!`);
     const fbShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}&quote=${text}`;
     window.open(fbShareUrl, '_blank', 'width=600,height=400');
+  };
+
+  const handleLikeClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onLike();
   };
 
   return (
@@ -66,19 +72,17 @@ const MusicCard: React.FC<MusicCardProps> = ({ song, onPlay, onDownload, isCurre
         </div>
 
         {/* Stats overlay for featured */}
-        {isFeatured && (
-          <div className="absolute bottom-2 right-2 md:bottom-3 md:right-3 flex items-center gap-2 md:gap-3 bg-black/70 backdrop-blur-md px-2 md:px-3 py-1 md:py-1.5 rounded-lg md:rounded-xl border border-white/10">
-             <div className="flex items-center gap-1 md:gap-1.5 text-[8px] md:text-[10px] font-black text-amber-500">
-               <svg className="w-2.5 h-2.5 md:w-3 md:h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-               {song.plays}
-             </div>
-             <div className="w-px h-2 bg-white/20" />
-             <div className="flex items-center gap-1 md:gap-1.5 text-[8px] md:text-[10px] font-black text-white">
-               <svg className="w-2.5 h-2.5 md:w-3 md:h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-               {song.downloads}
-             </div>
-          </div>
-        )}
+        <div className={`absolute bottom-2 right-2 md:bottom-3 md:right-3 flex items-center gap-2 md:gap-3 bg-black/70 backdrop-blur-md px-2 md:px-3 py-1 md:py-1.5 rounded-lg md:rounded-xl border border-white/10 transition-opacity ${isFeatured ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+           <div className="flex items-center gap-1 md:gap-1.5 text-[8px] md:text-[10px] font-black text-amber-500">
+             <svg className="w-2.5 h-2.5 md:w-3 md:h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+             {song.plays}
+           </div>
+           <div className="w-px h-2 bg-white/20" />
+           <div className="flex items-center gap-1 md:gap-1.5 text-[8px] md:text-[10px] font-black text-red-500">
+             <svg className="w-2.5 h-2.5 md:w-3 md:h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+             {song.likes}
+           </div>
+        </div>
       </div>
       
       <div className="flex justify-between items-center px-0.5 md:px-1 gap-2">
@@ -87,6 +91,15 @@ const MusicCard: React.FC<MusicCardProps> = ({ song, onPlay, onDownload, isCurre
           <p className="text-[8px] md:text-[10px] text-slate-500 font-bold truncate uppercase tracking-widest mt-0.5">{song.artist}</p>
         </div>
         <div className="flex items-center gap-1.5">
+          <button 
+            onClick={handleLikeClick}
+            className="p-1.5 md:p-2 bg-red-600/10 text-red-500 hover:text-white hover:bg-red-600 rounded-lg transition-all active:scale-90"
+            title="Adoro"
+          >
+            <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+            </svg>
+          </button>
           <button 
             onClick={handleShare}
             className="p-1.5 md:p-2 bg-blue-600/10 text-blue-500 hover:text-white hover:bg-blue-600 rounded-lg transition-all active:scale-90"

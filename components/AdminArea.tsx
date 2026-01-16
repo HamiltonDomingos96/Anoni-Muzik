@@ -19,7 +19,7 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [newSong, setNewSong] = useState<Partial<Song>>({
-    title: '', artist: '', genre: 'Rap', coverUrl: '', audioUrl: '', duration: '3:00', plays: 0, downloads: 0, isFeatured: false
+    title: '', artist: '', genre: 'Rap', coverUrl: '', audioUrl: '', duration: '3:00', plays: 0, downloads: 0, likes: 0, isFeatured: false
   });
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,11 +57,12 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
         id: Date.now().toString(),
         plays: 0,
         downloads: 0,
+        likes: newSong.likes || 0,
         isFeatured: newSong.isFeatured || false
       };
       setSongs([songToAdd, ...songs]);
     }
-    setNewSong({ title: '', artist: '', genre: 'Rap', coverUrl: '', audioUrl: '', duration: '3:00', plays: 0, downloads: 0, isFeatured: false });
+    setNewSong({ title: '', artist: '', genre: 'Rap', coverUrl: '', audioUrl: '', duration: '3:00', plays: 0, downloads: 0, likes: 0, isFeatured: false });
   };
 
   const handleEditClick = (song: Song) => {
@@ -76,7 +77,7 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
 
   const cancelEdit = () => {
     setEditingId(null);
-    setNewSong({ title: '', artist: '', genre: 'Rap', coverUrl: '', audioUrl: '', duration: '3:00', plays: 0, downloads: 0, isFeatured: false });
+    setNewSong({ title: '', artist: '', genre: 'Rap', coverUrl: '', audioUrl: '', duration: '3:00', plays: 0, downloads: 0, likes: 0, isFeatured: false });
   };
 
   const removeSong = (id: string) => {
@@ -86,38 +87,21 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
     }
   };
 
-  const resetStats = (id: string) => {
-    setSongs(songs.map(s => s.id === id ? { ...s, plays: 0, downloads: 0 } : s));
+  const updateLikeCount = (id: string, count: number) => {
+    setSongs(songs.map(s => s.id === id ? { ...s, likes: count } : s));
   };
 
   const stats = useMemo(() => {
     const totalPlays = songs.reduce((acc, s) => acc + (s.plays || 0), 0);
     const totalDownloads = songs.reduce((acc, s) => acc + (s.downloads || 0), 0);
+    const totalLikes = songs.reduce((acc, s) => acc + (s.likes || 0), 0);
     const multiplier = analyticsTimeframe === 'weekly' ? 7 : (analyticsTimeframe === 'monthly' ? 30 : 1);
-    const displayPlays = totalPlays * multiplier;
-    const displayDownloads = totalDownloads * multiplier;
     
-    const genreData = GENRES.map(genre => {
-      const genreSongs = songs.filter(s => s.genre === genre);
-      const genrePlays = genreSongs.reduce((acc, s) => acc + (s.plays || 0), 0);
-      return { 
-        name: genre, 
-        count: genreSongs.length, 
-        plays: genrePlays * multiplier,
-        percentage: totalPlays > 0 ? (genrePlays / totalPlays) * 100 : 0
-      };
-    }).sort((a, b) => b.plays - a.plays);
-
-    const artistMap: Record<string, number> = {};
-    songs.forEach(s => {
-      artistMap[s.artist] = (artistMap[s.artist] || 0) + (s.plays || 0);
-    });
-    const topArtists = Object.entries(artistMap)
-      .map(([name, plays]) => ({ name, plays: plays * multiplier }))
-      .sort((a, b) => b.plays - a.plays)
-      .slice(0, 5);
-
-    return { totalPlays: displayPlays, totalDownloads: displayDownloads, genreData, topArtists };
+    return { 
+      totalPlays: totalPlays * multiplier, 
+      totalDownloads: totalDownloads * multiplier, 
+      totalLikes: totalLikes * multiplier 
+    };
   }, [songs, analyticsTimeframe]);
 
   return (
@@ -194,6 +178,10 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
                   <label className="text-[10px] font-black uppercase text-slate-500">URL do MP3</label>
                   <input type="text" placeholder="https://..." className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:ring-1 focus:ring-amber-500 text-sm" value={newSong.audioUrl} onChange={e => setNewSong({...newSong, audioUrl: e.target.value})} />
                 </div>
+                <div className="md:col-span-1 space-y-2">
+                  <label className="text-[10px] font-black uppercase text-slate-500">Likes (Manual)</label>
+                  <input type="number" className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:ring-1 focus:ring-amber-500 text-sm" value={newSong.likes} onChange={e => setNewSong({...newSong, likes: parseInt(e.target.value) || 0})} />
+                </div>
                 <div className="md:col-span-3 flex justify-end items-center gap-6 mt-4">
                    <label className="flex items-center gap-2 cursor-pointer group">
                      <input type="checkbox" checked={newSong.isFeatured} onChange={e => setNewSong({...newSong, isFeatured: e.target.checked})} className="w-5 h-5 rounded-lg bg-black border-white/10 text-amber-500 focus:ring-amber-500" />
@@ -208,36 +196,64 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
             </section>
             <section>
               <div className="bg-slate-900 border border-white/5 rounded-[2rem] overflow-hidden shadow-xl">
-                <table className="w-full text-left">
-                  <thead className="bg-black/40 text-slate-500 text-[10px] font-black uppercase border-b border-white/5">
-                    <tr><th className="p-6">TRACK</th><th className="p-6 text-center">FEATURED</th><th className="p-6 text-center">PLAYS</th><th className="p-6 text-center">DWNLDS</th><th className="p-6 text-right">MGMT</th></tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5">
-                    {songs.map(song => (
-                      <tr key={song.id} className="hover:bg-white/[0.02]">
-                        <td className="p-6 flex items-center gap-4"><img src={song.coverUrl} className="w-12 h-12 rounded-lg object-cover" /><div className="truncate"><div className="font-bold text-white">{song.title}</div><div className="text-xs text-slate-500">{song.artist}</div></div></td>
-                        <td className="p-6 text-center"><button onClick={() => toggleFeatured(song.id)} className={`p-2 transition-all ${song.isFeatured ? 'text-amber-500 scale-110' : 'text-slate-800'}`}><svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></button></td>
-                        <td className="p-6 text-center font-mono text-amber-500 font-bold">{song.plays}</td>
-                        <td className="p-6 text-center font-mono text-slate-300 font-bold">{song.downloads}</td>
-                        <td className="p-6 text-right">
-                          <div className="flex justify-end items-center gap-2">
-                            <button 
-                              onClick={() => shareOnFacebook(song)} 
-                              className="w-9 h-9 rounded-xl bg-blue-600/10 text-blue-500 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all transform hover:scale-110 shadow-lg shadow-blue-600/10"
-                              title="Partilhar no Facebook"
-                            >
-                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z" />
-                              </svg>
-                            </button>
-                            <button onClick={() => handleEditClick(song)} className="w-9 h-9 rounded-xl bg-slate-800 text-slate-400 flex items-center justify-center hover:bg-blue-500/20 hover:text-blue-400 transition-all"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></button>
-                            <button onClick={() => removeSong(song.id)} className="w-9 h-9 rounded-xl bg-red-900/20 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
-                          </div>
-                        </td>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead className="bg-black/40 text-slate-500 text-[10px] font-black uppercase border-b border-white/5">
+                      <tr>
+                        <th className="p-6">TRACK</th>
+                        <th className="p-6 text-center">FEATURED</th>
+                        <th className="p-6 text-center">PLAYS</th>
+                        <th className="p-6 text-center">DWNLDS</th>
+                        <th className="p-6 text-center">LIKES</th>
+                        <th className="p-6 text-right">MGMT</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                      {songs.map(song => (
+                        <tr key={song.id} className="hover:bg-white/[0.02]">
+                          <td className="p-6 flex items-center gap-4">
+                            <img src={song.coverUrl} className="w-12 h-12 rounded-lg object-cover" />
+                            <div className="truncate">
+                              <div className="font-bold text-white">{song.title}</div>
+                              <div className="text-xs text-slate-500">{song.artist}</div>
+                            </div>
+                          </td>
+                          <td className="p-6 text-center">
+                            <button onClick={() => toggleFeatured(song.id)} className={`p-2 transition-all ${song.isFeatured ? 'text-amber-500 scale-110' : 'text-slate-800'}`}>
+                              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                            </button>
+                          </td>
+                          <td className="p-6 text-center font-mono text-amber-500 font-bold">{song.plays}</td>
+                          <td className="p-6 text-center font-mono text-slate-300 font-bold">{song.downloads}</td>
+                          <td className="p-6 text-center">
+                            <div className="flex flex-col items-center gap-1">
+                              <span className="font-mono text-red-500 font-bold">{song.likes}</span>
+                              <div className="flex gap-1">
+                                <button onClick={() => updateLikeCount(song.id, Math.max(0, (song.likes || 0) - 1))} className="text-[10px] bg-white/5 p-1 rounded hover:bg-red-500/20">-</button>
+                                <button onClick={() => updateLikeCount(song.id, (song.likes || 0) + 1)} className="text-[10px] bg-white/5 p-1 rounded hover:bg-red-500/20">+</button>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-6 text-right">
+                            <div className="flex justify-end items-center gap-2">
+                              <button 
+                                onClick={() => shareOnFacebook(song)} 
+                                className="w-9 h-9 rounded-xl bg-blue-600/10 text-blue-500 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all transform hover:scale-110 shadow-lg shadow-blue-600/10"
+                                title="Partilhar no Facebook"
+                              >
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z" />
+                                </svg>
+                              </button>
+                              <button onClick={() => handleEditClick(song)} className="w-9 h-9 rounded-xl bg-slate-800 text-slate-400 flex items-center justify-center hover:bg-blue-500/20 hover:text-blue-400 transition-all"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></button>
+                              <button onClick={() => removeSong(song.id)} className="w-9 h-9 rounded-xl bg-red-900/20 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </section>
           </div>
@@ -247,8 +263,8 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="bg-slate-900 p-6 rounded-[2rem] border border-white/5 shadow-xl"><p className="text-slate-500 text-[9px] font-black uppercase mb-4">Plays ({analyticsTimeframe})</p><div className="text-4xl font-black text-amber-500">{stats.totalPlays.toLocaleString()}</div></div>
               <div className="bg-slate-900 p-6 rounded-[2rem] border border-white/5 shadow-xl"><p className="text-slate-500 text-[9px] font-black uppercase mb-4">Downloads ({analyticsTimeframe})</p><div className="text-4xl font-black text-white">{stats.totalDownloads.toLocaleString()}</div></div>
-              <div className="bg-slate-900 p-6 rounded-[2rem] border border-white/5 shadow-xl"><p className="text-slate-500 text-[9px] font-black uppercase mb-4">Ativas</p><div className="text-4xl font-black text-slate-400">{songs.length}</div></div>
-              <div className="bg-slate-900 p-6 rounded-[2rem] border border-white/5 shadow-xl"><p className="text-slate-500 text-[9px] font-black uppercase mb-4">Conversão</p><div className="text-4xl font-black text-blue-500">{stats.totalPlays > 0 ? ((stats.totalDownloads / stats.totalPlays) * 100).toFixed(1) : 0}%</div></div>
+              <div className="bg-slate-900 p-6 rounded-[2rem] border border-white/5 shadow-xl"><p className="text-slate-500 text-[9px] font-black uppercase mb-4">Ameis ({analyticsTimeframe})</p><div className="text-4xl font-black text-red-500">{stats.totalLikes.toLocaleString()}</div></div>
+              <div className="bg-slate-900 p-6 rounded-[2rem] border border-white/5 shadow-xl"><p className="text-slate-500 text-[9px] font-black uppercase mb-4">Total Músicas</p><div className="text-4xl font-black text-slate-400">{songs.length}</div></div>
             </div>
           </div>
         ) : (

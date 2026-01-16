@@ -17,7 +17,7 @@ const INITIAL_SETTINGS: SiteSettings = {
 };
 
 const CATEGORIES = ['Todos', 'Rap', 'Kuduro', 'Afro House', 'Semba', 'Kizomba', 'Zouk'];
-const PERFORMANCE_FILTERS = ['Recentes', 'Mais Ouvidas', 'Mais Baixadas'];
+const PERFORMANCE_FILTERS = ['Recentes', 'Mais Ouvidas', 'Mais Baixadas', 'Mais Amadas'];
 
 const App: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -35,10 +35,12 @@ const App: React.FC = () => {
         ...s,
         plays: s.plays ?? 0,
         downloads: s.downloads ?? 0,
+        likes: s.likes ?? 0,
         isFeatured: s.isFeatured ?? false
       }));
     }
-    return MOCK_SONGS;
+    // Add likes to mock songs if not present
+    return MOCK_SONGS.map(s => ({ ...s, likes: 0 }));
   });
 
   const [settings, setSettings] = useState<SiteSettings>(() => {
@@ -61,6 +63,10 @@ const App: React.FC = () => {
 
   const incrementPlay = useCallback((songId: string) => {
     setSongs(prev => prev.map(s => s.id === songId ? { ...s, plays: (s.plays || 0) + 1 } : s));
+  }, []);
+
+  const handleLike = useCallback((songId: string) => {
+    setSongs(prev => prev.map(s => s.id === songId ? { ...s, likes: (s.likes || 0) + 1 } : s));
   }, []);
 
   const handleDownload = useCallback((song: Song) => {
@@ -134,6 +140,8 @@ const App: React.FC = () => {
       result = result.sort((a, b) => (b.plays || 0) - (a.plays || 0));
     } else if (performanceFilter === 'Mais Baixadas') {
       result = result.sort((a, b) => (b.downloads || 0) - (a.downloads || 0));
+    } else if (performanceFilter === 'Mais Amadas') {
+      result = result.sort((a, b) => (b.likes || 0) - (a.likes || 0));
     } else {
       result = [...result].reverse();
     }
@@ -298,6 +306,7 @@ const App: React.FC = () => {
                   song={song}
                   onPlay={handlePlaySong}
                   onDownload={() => handleDownload(song)}
+                  onLike={() => handleLike(song.id)}
                   isCurrent={currentSong?.id === song.id}
                   isPlaying={isPlaying && currentSong?.id === song.id}
                   isFeatured
@@ -354,6 +363,7 @@ const App: React.FC = () => {
                 song={song} 
                 onPlay={handlePlaySong}
                 onDownload={() => handleDownload(song)}
+                onLike={() => handleLike(song.id)}
                 isCurrent={currentSong?.id === song.id}
                 isPlaying={isPlaying && currentSong?.id === song.id}
               />

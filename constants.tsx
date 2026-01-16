@@ -11,7 +11,9 @@ export const MOCK_SONGS: Song[] = [
     duration: '3:45',
     genre: 'Regional',
     plays: 0,
-    downloads: 0
+    downloads: 0,
+    // Fix: Added missing likes property
+    likes: 0
   },
   {
     id: '1',
@@ -22,7 +24,9 @@ export const MOCK_SONGS: Song[] = [
     duration: '6:12',
     genre: 'Synthwave',
     plays: 0,
-    downloads: 0
+    downloads: 0,
+    // Fix: Added missing likes property
+    likes: 0
   },
   {
     id: '2',
@@ -33,7 +37,9 @@ export const MOCK_SONGS: Song[] = [
     duration: '7:05',
     genre: 'Hip Hop',
     plays: 0,
-    downloads: 0
+    downloads: 0,
+    // Fix: Added missing likes property
+    likes: 0
   },
   {
     id: '3',
@@ -44,7 +50,9 @@ export const MOCK_SONGS: Song[] = [
     duration: '5:15',
     genre: 'Acoustic',
     plays: 0,
-    downloads: 0
+    downloads: 0,
+    // Fix: Added missing likes property
+    likes: 0
   },
   {
     id: '4',
@@ -55,6 +63,8 @@ export const MOCK_SONGS: Song[] = [
     duration: '4:45',
     genre: 'Electronic',
     plays: 0,
-    downloads: 0
+    downloads: 0,
+    // Fix: Added missing likes property
+    likes: 0
   }
 ];

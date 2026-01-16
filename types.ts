@@ -9,7 +9,8 @@ export interface Song {
   genre: string;
   plays: number;
   downloads: number;
-  isFeatured?: boolean; // New property for manual management
+  likes: number; // New property for "Adoro" count
+  isFeatured?: boolean;
 }
 
 export interface SiteSettings {
