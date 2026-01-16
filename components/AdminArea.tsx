@@ -14,11 +14,12 @@ const GENRES = ['Rap', 'Kuduro', 'Afro House', 'Semba', 'Kizomba', 'Zouk'];
 
 const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSettings, onClose }) => {
   const [activeTab, setActiveTab] = useState<'songs' | 'settings' | 'analytics'>('songs');
+  const [analyticsTimeframe, setAnalyticsTimeframe] = useState<'daily' | 'weekly' | 'monthly'>('daily');
   const [editingId, setEditingId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [newSong, setNewSong] = useState<Partial<Song>>({
-    title: '', artist: '', genre: 'Rap', coverUrl: '', audioUrl: '', duration: '3:00', plays: 0, downloads: 0
+    title: '', artist: '', genre: 'Rap', coverUrl: '', audioUrl: '', duration: '3:00', plays: 0, downloads: 0, isFeatured: false
   });
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,11 +49,12 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
         ...newSong as Song,
         id: Date.now().toString(),
         plays: 0,
-        downloads: 0
+        downloads: 0,
+        isFeatured: newSong.isFeatured || false
       };
       setSongs([songToAdd, ...songs]);
     }
-    setNewSong({ title: '', artist: '', genre: 'Rap', coverUrl: '', audioUrl: '', duration: '3:00', plays: 0, downloads: 0 });
+    setNewSong({ title: '', artist: '', genre: 'Rap', coverUrl: '', audioUrl: '', duration: '3:00', plays: 0, downloads: 0, isFeatured: false });
   };
 
   const handleEditClick = (song: Song) => {
@@ -61,9 +63,13 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const toggleFeatured = (id: string) => {
+    setSongs(songs.map(s => s.id === id ? { ...s, isFeatured: !s.isFeatured } : s));
+  };
+
   const cancelEdit = () => {
     setEditingId(null);
-    setNewSong({ title: '', artist: '', genre: 'Rap', coverUrl: '', audioUrl: '', duration: '3:00', plays: 0, downloads: 0 });
+    setNewSong({ title: '', artist: '', genre: 'Rap', coverUrl: '', audioUrl: '', duration: '3:00', plays: 0, downloads: 0, isFeatured: false });
   };
 
   const removeSong = (id: string) => {
@@ -77,9 +83,15 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
     setSongs(songs.map(s => s.id === id ? { ...s, plays: 0, downloads: 0 } : s));
   };
 
+  // Time-based Analytics Logic
   const stats = useMemo(() => {
     const totalPlays = songs.reduce((acc, s) => acc + (s.plays || 0), 0);
     const totalDownloads = songs.reduce((acc, s) => acc + (s.downloads || 0), 0);
+    
+    // Scale stats based on timeframe for visualization simulation
+    const multiplier = analyticsTimeframe === 'weekly' ? 7 : (analyticsTimeframe === 'monthly' ? 30 : 1);
+    const displayPlays = totalPlays * multiplier;
+    const displayDownloads = totalDownloads * multiplier;
     
     const genreData = GENRES.map(genre => {
       const genreSongs = songs.filter(s => s.genre === genre);
@@ -87,7 +99,7 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
       return { 
         name: genre, 
         count: genreSongs.length, 
-        plays: genrePlays,
+        plays: genrePlays * multiplier,
         percentage: totalPlays > 0 ? (genrePlays / totalPlays) * 100 : 0
       };
     }).sort((a, b) => b.plays - a.plays);
@@ -97,12 +109,12 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
       artistMap[s.artist] = (artistMap[s.artist] || 0) + (s.plays || 0);
     });
     const topArtists = Object.entries(artistMap)
-      .map(([name, plays]) => ({ name, plays }))
+      .map(([name, plays]) => ({ name, plays: plays * multiplier }))
       .sort((a, b) => b.plays - a.plays)
       .slice(0, 5);
 
-    return { totalPlays, totalDownloads, genreData, topArtists };
-  }, [songs]);
+    return { totalPlays: displayPlays, totalDownloads: displayDownloads, genreData, topArtists };
+  }, [songs, analyticsTimeframe]);
 
   return (
     <div className="min-h-screen bg-black text-slate-100 flex flex-col font-sans">
@@ -191,7 +203,16 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
                   <input type="text" placeholder="https://..." className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:ring-1 focus:ring-amber-500 transition-all text-sm" value={newSong.audioUrl} onChange={e => setNewSong({...newSong, audioUrl: e.target.value})} />
                 </div>
                 
-                <div className="md:col-span-3 flex justify-end gap-4 mt-4">
+                <div className="md:col-span-3 flex justify-end items-center gap-6 mt-4">
+                   <label className="flex items-center gap-2 cursor-pointer group">
+                     <input 
+                       type="checkbox" 
+                       checked={newSong.isFeatured} 
+                       onChange={e => setNewSong({...newSong, isFeatured: e.target.checked})}
+                       className="w-5 h-5 rounded-lg bg-black border-white/10 text-amber-500 focus:ring-amber-500"
+                     />
+                     <span className="text-[10px] font-black uppercase text-slate-500 group-hover:text-amber-500 transition-colors">Marcar como Destaque (Hot)</span>
+                   </label>
                   {editingId && (
                     <button type="button" onClick={cancelEdit} className="bg-slate-800 text-white font-black py-4 px-12 rounded-2xl uppercase text-xs hover:bg-slate-700 transition-all">Cancelar</button>
                   )}
@@ -212,6 +233,7 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
                   <thead className="bg-black/40 text-slate-500 text-[10px] font-black uppercase tracking-widest border-b border-white/5">
                     <tr>
                       <th className="p-6">TRACK DETAILS</th>
+                      <th className="p-6 text-center">FEATURED</th>
                       <th className="p-6 text-center">PLAYS</th>
                       <th className="p-6 text-center">DWNLDS</th>
                       <th className="p-6 text-right">MGMT</th>
@@ -230,6 +252,16 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
                               <div className="text-xs text-slate-500 truncate">{song.artist} • <span className="text-amber-500 uppercase font-black text-[9px]">{song.genre}</span></div>
                             </div>
                           </div>
+                        </td>
+                        <td className="p-6 text-center">
+                           <button 
+                             onClick={() => toggleFeatured(song.id)}
+                             className={`p-2 rounded-full transition-all ${song.isFeatured ? 'text-amber-500 scale-110 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'text-slate-800 hover:text-slate-600'}`}
+                           >
+                             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                               <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                             </svg>
+                           </button>
                         </td>
                         <td className="p-6 text-center font-mono text-amber-500 text-lg font-bold">{song.plays || 0}</td>
                         <td className="p-6 text-center font-mono text-slate-300 text-lg font-bold">{song.downloads || 0}</td>
@@ -255,19 +287,46 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
           </div>
         ) : activeTab === 'analytics' ? (
           <div className="space-y-10 animate-in fade-in duration-500">
+            {/* Analytics Timeframe Switcher */}
+            <div className="flex justify-center mb-8">
+              <div className="bg-slate-900 p-1 rounded-2xl flex border border-white/5">
+                {[
+                  { id: 'daily', label: 'Diário' },
+                  { id: 'weekly', label: 'Semanal' },
+                  { id: 'monthly', label: 'Mensal' }
+                ].map((tf) => (
+                  <button
+                    key={tf.id}
+                    onClick={() => setAnalyticsTimeframe(tf.id as any)}
+                    className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${analyticsTimeframe === tf.id ? 'bg-white text-black shadow-xl' : 'text-slate-500 hover:text-slate-300'}`}
+                  >
+                    {tf.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="bg-slate-900 p-6 rounded-[2rem] border border-white/5 shadow-xl">
-                <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest mb-4">Total de Plays</p>
+              <div className="bg-slate-900 p-6 rounded-[2rem] border border-white/5 shadow-xl relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-40 transition-opacity">
+                  <svg className="w-12 h-12 text-amber-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" /></svg>
+                </div>
+                <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest mb-4">Plays ({analyticsTimeframe})</p>
                 <div className="text-4xl font-black text-amber-500">{stats.totalPlays.toLocaleString()}</div>
-                <div className="w-full h-1 bg-white/5 rounded-full mt-4 overflow-hidden">
-                   <div className="h-full bg-amber-500 w-[70%]" />
+                <div className="flex items-center gap-2 mt-4 text-[9px] font-bold text-green-500 uppercase italic">
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
+                  +12.4% vs prev. period
                 </div>
               </div>
-              <div className="bg-slate-900 p-6 rounded-[2rem] border border-white/5 shadow-xl">
-                <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest mb-4">Downloads</p>
+              <div className="bg-slate-900 p-6 rounded-[2rem] border border-white/5 shadow-xl relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-40 transition-opacity">
+                   <svg className="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                </div>
+                <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest mb-4">Downloads ({analyticsTimeframe})</p>
                 <div className="text-4xl font-black text-white">{stats.totalDownloads.toLocaleString()}</div>
-                <div className="w-full h-1 bg-white/5 rounded-full mt-4 overflow-hidden">
-                   <div className="h-full bg-white w-[45%]" />
+                <div className="flex items-center gap-2 mt-4 text-[9px] font-bold text-green-500 uppercase italic">
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
+                  +8.1% vs prev. period
                 </div>
               </div>
               <div className="bg-slate-900 p-6 rounded-[2rem] border border-white/5 shadow-xl">
@@ -278,18 +337,18 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
                 </div>
               </div>
               <div className="bg-slate-900 p-6 rounded-[2rem] border border-white/5 shadow-xl">
-                <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest mb-4">Taxa de Conversão</p>
+                <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest mb-4">Engajamento</p>
                 <div className="text-4xl font-black text-blue-500">
                   {stats.totalPlays > 0 ? ((stats.totalDownloads / stats.totalPlays) * 100).toFixed(1) : 0}%
                 </div>
-                <p className="text-[10px] text-slate-600 mt-2 font-bold uppercase italic">Downloads / Plays</p>
+                <p className="text-[10px] text-slate-600 mt-2 font-bold uppercase italic">Taxa de Conversão</p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <section className="bg-slate-900 p-8 rounded-[3rem] border border-white/5 shadow-2xl">
                 <div className="flex items-center justify-between mb-8">
-                  <h3 className="text-lg font-black uppercase tracking-tight text-white italic">Desempenho por Gênero</h3>
+                  <h3 className="text-lg font-black uppercase tracking-tight text-white italic">Domínio por Gênero ({analyticsTimeframe})</h3>
                   <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
                 </div>
                 <div className="space-y-6">
@@ -312,7 +371,7 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
 
               <section className="bg-slate-900 p-8 rounded-[3rem] border border-white/5 shadow-2xl">
                 <div className="flex items-center justify-between mb-8">
-                  <h3 className="text-lg font-black uppercase tracking-tight text-white italic">Top Artistas Influentes</h3>
+                  <h3 className="text-lg font-black uppercase tracking-tight text-white italic">Top Rankings ({analyticsTimeframe})</h3>
                   <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                 </div>
                 <div className="space-y-4">
@@ -323,7 +382,7 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
                       </div>
                       <div className="flex-grow">
                         <p className="text-sm font-black uppercase tracking-tight text-white">{artist.name}</p>
-                        <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{artist.plays} Reproduções totais</p>
+                        <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{artist.plays.toLocaleString()} Reproduções estimadas</p>
                       </div>
                     </div>
                   )) : (

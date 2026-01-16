@@ -34,7 +34,8 @@ const App: React.FC = () => {
       return parsed.map((s: any) => ({
         ...s,
         plays: s.plays ?? 0,
-        downloads: s.downloads ?? 0
+        downloads: s.downloads ?? 0,
+        isFeatured: s.isFeatured ?? false
       }));
     }
     return MOCK_SONGS;
@@ -117,6 +118,9 @@ const App: React.FC = () => {
   };
 
   const trendingSongs = useMemo(() => {
+    // Show manual featured songs first, fallback to top played if none are marked
+    const manualFeatured = songs.filter(s => s.isFeatured);
+    if (manualFeatured.length > 0) return manualFeatured;
     return [...songs].sort((a, b) => (b.plays || 0) - (a.plays || 0)).slice(0, 6);
   }, [songs]);
 
