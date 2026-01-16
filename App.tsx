@@ -13,6 +13,7 @@ const INITIAL_SETTINGS: SiteSettings = {
   heroSubtitle: "Distribuição anônima e gratuita. Os ritmos que movem a nossa terra em um só lugar.",
   heroImageUrl: "https://images.unsplash.com/photo-1493225255756-d9584f8606e9?q=80&w=2070&auto=format&fit=crop",
   accentColor: "#f59e0b",
+  backgroundColor: "#020617", // Default slate-950
   footerText: "site criado por Hamilton Almeida Domingos"
 };
 
@@ -52,7 +53,6 @@ const App: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [performanceFilter, setPerformanceFilter] = useState('Recentes');
 
-  // Handle individual song links on load
   useEffect(() => {
     const hash = window.location.hash;
     if (hash.startsWith('#song=')) {
@@ -60,7 +60,6 @@ const App: React.FC = () => {
       const sharedSong = songs.find(s => s.id === songId);
       if (sharedSong) {
         setCurrentSong(sharedSong);
-        // Optional: Scroll to the song card
         setTimeout(() => {
           const element = document.getElementById(`song-card-${songId}`);
           element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -178,20 +177,19 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen pb-40 bg-slate-950 text-slate-50 flex flex-col font-sans overflow-x-hidden">
-      <nav className="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-xl border-b border-white/5 px-4 md:px-8 py-4">
+    <div 
+      className="min-h-screen pb-40 text-slate-50 flex flex-col font-sans overflow-x-hidden transition-colors duration-700"
+      style={{ backgroundColor: settings.backgroundColor }}
+    >
+      <nav className="sticky top-0 z-40 bg-black/40 backdrop-blur-xl border-b border-white/5 px-4 md:px-8 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            {settings.logoUrl ? (
-              <img src={settings.logoUrl} alt={settings.siteName} className="h-10 object-contain" />
-            ) : (
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/20" style={{ backgroundColor: settings.accentColor }}>
-                <svg className="w-6 h-6 text-slate-950" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
-                </svg>
-              </div>
-            )}
-            <h1 className="text-xl md:text-2xl font-black tracking-tighter uppercase italic">{settings.siteName}</h1>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg" style={{ backgroundColor: settings.accentColor }}>
+              <svg className="w-6 h-6 text-slate-950" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
+              </svg>
+            </div>
+            <h1 className="text-xl md:text-2xl font-black tracking-tighter uppercase italic text-white">{settings.siteName}</h1>
           </div>
           
           <div className="hidden md:flex relative w-96 group">
@@ -218,80 +216,7 @@ const App: React.FC = () => {
         </div>
       </nav>
 
-      {showMenu && (
-        <div 
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-opacity"
-          onClick={() => setShowMenu(false)}
-        >
-          <div 
-            className="absolute right-0 top-0 bottom-0 w-80 bg-slate-900/95 backdrop-blur-3xl border-l border-white/10 shadow-2xl p-8 flex flex-col animate-in slide-in-from-right duration-300"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-xl font-black uppercase tracking-tighter italic">Navegação</h2>
-              <button onClick={() => setShowMenu(false)} className="w-10 h-10 flex items-center justify-center bg-white/5 rounded-full text-slate-500 hover:text-white transition-colors">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            <div className="flex-grow overflow-y-auto no-scrollbar space-y-6">
-              <div className="space-y-4">
-                <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Categorias</p>
-                <div className="grid grid-cols-1 gap-2">
-                  {CATEGORIES.map((cat) => (
-                    <button 
-                      key={cat}
-                      onClick={() => { setSearchQuery(cat === 'Todos' ? '' : cat); setShowMenu(false); }}
-                      className="w-full text-left p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all group flex items-center justify-between"
-                    >
-                      <span className="font-bold text-xs uppercase tracking-widest">{cat}</span>
-                      <svg className="w-4 h-4 text-slate-600 group-hover:text-amber-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-3 pt-6 border-t border-white/5">
-                <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Sistema</p>
-                <button onClick={() => { setShowAbout(true); setShowMenu(false); }} className="w-full flex items-center gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-all group">
-                  <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center group-hover:bg-amber-500 transition-colors">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                  </div>
-                  <span className="font-bold text-xs uppercase tracking-widest">Sobre Nós</span>
-                </button>
-                <button onClick={() => { setShowLoginModal(true); setShowMenu(false); }} className="w-full flex items-center gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-all group">
-                  <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center group-hover:bg-red-500 transition-colors">
-                    <span className="font-black text-[10px]">HD</span>
-                  </div>
-                  <span className="font-bold text-xs uppercase tracking-widest">HD</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="mt-auto pt-8 border-t border-white/5 text-center">
-              <p className="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] mb-2">Desenvolvido por</p>
-              <p className="text-xs font-black text-white uppercase tracking-widest italic">Hamilton Almeida Domingos</p>
-            </div>
-          </div>
-        </div>
-      )}
-
       <main className="max-w-7xl mx-auto w-full p-4 md:p-8 flex-grow">
-        <div className="md:hidden mb-8 relative group">
-          <input 
-            type="text" 
-            placeholder="Pesquisar batidas..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-slate-900/50 border border-white/10 rounded-2xl py-3 px-12 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm transition-all"
-          />
-          <svg className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-        </div>
-
         <section className="mb-12 rounded-[2.5rem] overflow-hidden relative min-h-[300px] md:min-h-[400px] flex items-end p-6 md:p-12 shadow-2xl border border-white/5">
           <img src={settings.heroImageUrl} alt="Hero" className="absolute inset-0 object-cover w-full h-full brightness-[0.3]" />
           <div className="relative z-10 max-w-3xl">
@@ -312,8 +237,8 @@ const App: React.FC = () => {
 
         <section className="mb-16">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-2 h-8 bg-amber-500 rounded-full" />
-            <h3 className="text-2xl font-black tracking-tight uppercase">Em Destaque (Hot)</h3>
+            <div className="w-2 h-8 rounded-full" style={{ backgroundColor: settings.accentColor }} />
+            <h3 className="text-2xl font-black tracking-tight uppercase text-white">Em Destaque (Hot)</h3>
           </div>
           <div className="flex gap-4 md:gap-6 overflow-x-auto pb-6 snap-x scroll-smooth no-scrollbar">
             {trendingSongs.map((song) => (
@@ -339,27 +264,15 @@ const App: React.FC = () => {
               onClick={() => setSearchQuery(cat === 'Todos' ? '' : cat)}
               className={`whitespace-nowrap px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
                 (searchQuery === cat || (cat === 'Todos' && searchQuery === '')) 
-                ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' 
-                : 'bg-slate-900 text-slate-500 border border-white/5 hover:text-white'
+                ? 'text-black shadow-lg' 
+                : 'bg-slate-900/50 text-slate-500 border border-white/5 hover:text-white'
               }`}
+              style={{ 
+                backgroundColor: (searchQuery === cat || (cat === 'Todos' && searchQuery === '')) ? settings.accentColor : undefined,
+                boxShadow: (searchQuery === cat || (cat === 'Todos' && searchQuery === '')) ? `0 10px 15px -3px ${settings.accentColor}40` : undefined
+              }}
             >
               {cat}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex gap-3 mb-10 overflow-x-auto pb-2 no-scrollbar border-b border-white/5">
-          {PERFORMANCE_FILTERS.map((filter) => (
-            <button 
-              key={filter}
-              onClick={() => setPerformanceFilter(filter)}
-              className={`whitespace-nowrap px-4 py-3 text-[11px] font-black uppercase tracking-widest transition-all border-b-2 ${
-                performanceFilter === filter 
-                ? 'border-white text-white' 
-                : 'border-transparent text-slate-600 hover:text-slate-300'
-              }`}
-            >
-              {filter}
             </button>
           ))}
         </div>
@@ -369,9 +282,7 @@ const App: React.FC = () => {
             <h3 className="text-xl font-black text-white tracking-tight uppercase">
               {searchQuery ? `${searchQuery}` : 'Catálogo Completo'}
             </h3>
-            <span className="text-slate-600 text-[10px] font-black font-mono uppercase tracking-widest">{filteredAndSortedSongs.length} TRACKS</span>
           </div>
-          
           <div className="grid grid-cols-2 gap-4 md:gap-8">
             {filteredAndSortedSongs.map(song => (
               <div key={song.id} id={`song-card-${song.id}`}>
@@ -386,75 +297,30 @@ const App: React.FC = () => {
               </div>
             ))}
           </div>
-          {filteredAndSortedSongs.length === 0 && (
-            <div className="py-24 text-center bg-slate-900/20 rounded-[2rem] border border-dashed border-white/10">
-              <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Nenhum lançamento nesta categoria.</p>
-            </div>
-          )}
         </section>
       </main>
 
-      <footer className="py-20 border-t border-white/5 flex flex-col items-center gap-8 bg-slate-950">
+      <footer className="py-20 border-t border-white/5 flex flex-col items-center gap-8">
         <div className="flex items-center gap-2 opacity-70">
           <div className="w-8 h-8 rounded-lg" style={{ backgroundColor: settings.accentColor }} />
-          <span className="text-sm font-black tracking-tighter uppercase italic">{settings.siteName}</span>
+          <span className="text-sm font-black tracking-tighter uppercase italic text-white">{settings.siteName}</span>
         </div>
-
-        {/* Social Media Links */}
-        <div className="flex items-center gap-6">
-          <a href="https://wa.me/244948352425" target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-green-500 hover:bg-green-500/10 hover:border-green-500/30 transition-all transform hover:-translate-y-1">
-            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.025 3.14l-.904 3.316 3.403-.89c.836.457 1.706.7 2.244.7h.005c3.181 0 5.767-2.586 5.768-5.766 0-3.18-2.586-5.766-5.768-5.766z" /></svg>
-          </a>
-          <a href="https://facebook.com/anonimuzik" target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-blue-500 hover:bg-blue-500/10 hover:border-blue-500/30 transition-all transform hover:-translate-y-1">
-            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z" /></svg>
-          </a>
-          <a href="https://youtube.com/@anonimuzik" target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-500/10 hover:border-red-500/30 transition-all transform hover:-translate-y-1">
-            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" /></svg>
-          </a>
-        </div>
-
-        <div className="flex flex-col items-center gap-2">
-          <div className="text-slate-700 text-[9px] font-black tracking-[0.4em] uppercase">Private Distribution Network</div>
-          <div className="text-slate-400 text-[10px] font-bold uppercase tracking-widest pt-2">
-            {settings.footerText}
-          </div>
+        <div className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">
+          {settings.footerText}
         </div>
       </footer>
 
-      {showAbout && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/98 backdrop-blur-3xl p-6">
-          <div className="bg-slate-900 border border-white/10 p-10 rounded-[3rem] w-full max-w-2xl shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-300">
-             <div className="absolute top-0 left-0 w-full h-1 bg-amber-500" />
-             <div className="flex justify-between items-center mb-10">
-               <h3 className="text-2xl font-black tracking-tighter uppercase italic">Sobre {settings.siteName}</h3>
-               <button onClick={() => setShowAbout(false)} className="w-10 h-10 flex items-center justify-center bg-white/5 rounded-full text-slate-500 hover:text-white">
-                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-               </button>
-             </div>
-             <div className="space-y-6 text-slate-300 leading-relaxed font-medium">
-               <p>
-                 A <span className="text-white font-bold">{settings.siteName}</span> é a maior plataforma de distribuição musical dedicada à preservação e promoção dos ritmos nacionais angolanos. 
-               </p>
-               <button onClick={() => setShowAbout(false)} className="w-full bg-white text-black font-black py-4 rounded-2xl uppercase text-[10px] tracking-widest mt-8 hover:bg-amber-500 transition-all shadow-xl">Fechar</button>
-             </div>
-          </div>
-        </div>
-      )}
-
       {showLoginModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/98 backdrop-blur-3xl p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-3xl p-4">
           <div className="bg-slate-900 border border-white/10 p-10 rounded-[3rem] w-full max-w-sm shadow-2xl relative overflow-hidden">
-             <div className="absolute top-0 left-0 w-full h-1 bg-amber-500" />
+            <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: settings.accentColor }} />
             <h3 className="text-lg font-black mb-8 text-center tracking-widest uppercase text-white/50">Terminal Access</h3>
             <form onSubmit={handleAdminLogin} className="space-y-6">
               <input 
                 type="password" placeholder="TOKEN" autoFocus value={passwordInput} onChange={(e) => setPasswordInput(e.target.value)}
-                className={`w-full bg-black/40 border ${loginError ? 'border-red-500' : 'border-white/10'} p-5 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all text-center tracking-[0.5em] font-black text-2xl placeholder:tracking-normal placeholder:text-slate-800`}
+                className="w-full bg-black/40 border border-white/10 p-5 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all text-center tracking-[0.5em] font-black text-2xl text-white"
               />
-              <div className="flex flex-col gap-3">
-                <button type="submit" className="w-full bg-white text-black font-black py-4 rounded-2xl uppercase text-[10px] tracking-widest hover:bg-amber-500 transition-all shadow-lg">Authenticate</button>
-                <button type="button" onClick={() => setShowLoginModal(false)} className="w-full py-2 text-slate-600 font-bold text-[9px] uppercase hover:text-white transition-colors">Abort</button>
-              </div>
+              <button type="submit" className="w-full bg-white text-black font-black py-4 rounded-2xl uppercase text-[10px] tracking-widest hover:bg-amber-500 transition-all shadow-lg">Authenticate</button>
             </form>
           </div>
         </div>

@@ -9,7 +9,7 @@ export interface Song {
   genre: string;
   plays: number;
   downloads: number;
-  likes: number; // New property for "Adoro" count
+  likes: number; 
   isFeatured?: boolean;
 }
 
@@ -20,6 +20,7 @@ export interface SiteSettings {
   heroSubtitle: string;
   heroImageUrl: string;
   accentColor: string;
+  backgroundColor: string; // Nova propriedade para o fundo do site
   footerText: string;
 }
 
