@@ -76,8 +76,8 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
       const songToAdd: Song = {
         ...newSong as Song,
         id: Date.now().toString(),
-        plays: 0,
-        downloads: 0,
+        plays: newSong.plays || 0,
+        downloads: newSong.downloads || 0,
         likes: newSong.likes || 0,
         isFeatured: newSong.isFeatured || false
       };
@@ -108,8 +108,8 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
     }
   };
 
-  const updateLikeCount = (id: string, count: number) => {
-    setSongs(songs.map(s => s.id === id ? { ...s, likes: count } : s));
+  const updateMetric = (id: string, field: 'plays' | 'downloads' | 'likes', newValue: number) => {
+    setSongs(songs.map(s => s.id === id ? { ...s, [field]: Math.max(0, newValue) } : s));
   };
 
   const stats = useMemo(() => {
@@ -200,8 +200,12 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
                   <input type="text" placeholder="https://..." className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:ring-1 focus:ring-amber-500 text-sm" value={newSong.audioUrl} onChange={e => setNewSong({...newSong, audioUrl: e.target.value})} />
                 </div>
                 <div className="md:col-span-1 space-y-2">
-                  <label className="text-[10px] font-black uppercase text-slate-500">Likes (Manual)</label>
-                  <input type="number" className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:ring-1 focus:ring-amber-500 text-sm" value={newSong.likes} onChange={e => setNewSong({...newSong, likes: parseInt(e.target.value) || 0})} />
+                  <label className="text-[10px] font-black uppercase text-slate-500">Plays (Iniciais)</label>
+                  <input type="number" className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:ring-1 focus:ring-amber-500 text-sm" value={newSong.plays} onChange={e => setNewSong({...newSong, plays: parseInt(e.target.value) || 0})} />
+                </div>
+                <div className="md:col-span-1 space-y-2">
+                   <label className="text-[10px] font-black uppercase text-slate-500">Likes (Iniciais)</label>
+                   <input type="number" className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:ring-1 focus:ring-amber-500 text-sm" value={newSong.likes} onChange={e => setNewSong({...newSong, likes: parseInt(e.target.value) || 0})} />
                 </div>
                 <div className="md:col-span-3 flex justify-end items-center gap-6 mt-4">
                    <label className="flex items-center gap-2 cursor-pointer group">
@@ -224,6 +228,7 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
                         <th className="p-6">TRACK</th>
                         <th className="p-6 text-center">FEATURED</th>
                         <th className="p-6 text-center">PLAYS</th>
+                        <th className="p-6 text-center">DWNLDS</th>
                         <th className="p-6 text-center">LIKES</th>
                         <th className="p-6 text-right">MGMT</th>
                       </tr>
@@ -243,13 +248,30 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
                               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
                             </button>
                           </td>
-                          <td className="p-6 text-center font-mono text-amber-500 font-bold">{song.plays}</td>
+                          <td className="p-6 text-center">
+                            <div className="flex flex-col items-center gap-1">
+                              <span className="font-mono text-amber-500 font-bold">{song.plays}</span>
+                              <div className="flex gap-1">
+                                <button onClick={() => updateMetric(song.id, 'plays', song.plays - 1)} className="text-[10px] bg-white/5 p-1 rounded hover:bg-amber-500/20 px-2">-</button>
+                                <button onClick={() => updateMetric(song.id, 'plays', song.plays + 1)} className="text-[10px] bg-white/5 p-1 rounded hover:bg-amber-500/20 px-2">+</button>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-6 text-center">
+                            <div className="flex flex-col items-center gap-1">
+                              <span className="font-mono text-slate-300 font-bold">{song.downloads}</span>
+                              <div className="flex gap-1">
+                                <button onClick={() => updateMetric(song.id, 'downloads', song.downloads - 1)} className="text-[10px] bg-white/5 p-1 rounded hover:bg-white/10 px-2">-</button>
+                                <button onClick={() => updateMetric(song.id, 'downloads', song.downloads + 1)} className="text-[10px] bg-white/5 p-1 rounded hover:bg-white/10 px-2">+</button>
+                              </div>
+                            </div>
+                          </td>
                           <td className="p-6 text-center">
                             <div className="flex flex-col items-center gap-1">
                               <span className="font-mono text-red-500 font-bold">{song.likes}</span>
                               <div className="flex gap-1">
-                                <button onClick={() => updateLikeCount(song.id, Math.max(0, (song.likes || 0) - 1))} className="text-[10px] bg-white/5 p-1 rounded hover:bg-red-500/20 px-2">-</button>
-                                <button onClick={() => updateLikeCount(song.id, (song.likes || 0) + 1)} className="text-[10px] bg-white/5 p-1 rounded hover:bg-red-500/20 px-2">+</button>
+                                <button onClick={() => updateMetric(song.id, 'likes', song.likes - 1)} className="text-[10px] bg-white/5 p-1 rounded hover:bg-red-500/20 px-2">-</button>
+                                <button onClick={() => updateMetric(song.id, 'likes', song.likes + 1)} className="text-[10px] bg-white/5 p-1 rounded hover:bg-red-500/20 px-2">+</button>
                               </div>
                             </div>
                           </td>
