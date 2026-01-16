@@ -118,7 +118,6 @@ const App: React.FC = () => {
   };
 
   const trendingSongs = useMemo(() => {
-    // Show manual featured songs first, fallback to top played if none are marked
     const manualFeatured = songs.filter(s => s.isFeatured);
     if (manualFeatured.length > 0) return manualFeatured;
     return [...songs].sort((a, b) => (b.plays || 0) - (a.plays || 0)).slice(0, 6);
@@ -156,7 +155,6 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen pb-40 bg-slate-950 text-slate-50 flex flex-col font-sans overflow-x-hidden">
-      {/* Navbar */}
       <nav className="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-xl border-b border-white/5 px-4 md:px-8 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -196,7 +194,6 @@ const App: React.FC = () => {
         </div>
       </nav>
 
-      {/* Lateral Menu Overlay */}
       {showMenu && (
         <div 
           className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-opacity"
@@ -216,7 +213,6 @@ const App: React.FC = () => {
             </div>
 
             <div className="flex-grow overflow-y-auto no-scrollbar space-y-6">
-              {/* Categorias Section */}
               <div className="space-y-4">
                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Categorias</p>
                 <div className="grid grid-cols-1 gap-2">
@@ -233,36 +229,15 @@ const App: React.FC = () => {
                 </div>
               </div>
 
-              {/* General Actions */}
               <div className="space-y-3 pt-6 border-t border-white/5">
                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Sistema</p>
-                
-                <button 
-                  onClick={() => { setShowAbout(true); setShowMenu(false); }}
-                  className="w-full flex items-center gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-all group"
-                >
+                <button onClick={() => { setShowAbout(true); setShowMenu(false); }} className="w-full flex items-center gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-all group">
                   <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center group-hover:bg-amber-500 transition-colors">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                   </div>
                   <span className="font-bold text-xs uppercase tracking-widest">Sobre Nós</span>
                 </button>
-
-                <a 
-                  href="https://wa.me/244948352425" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="w-full flex items-center gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-all group"
-                >
-                  <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center group-hover:bg-green-500 transition-colors">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.025 3.14l-.904 3.316 3.403-.89c.836.457 1.706.7 2.244.7h.005c3.181 0 5.767-2.586 5.768-5.766 0-3.18-2.586-5.766-5.768-5.766z" /></svg>
-                  </div>
-                  <span className="font-bold text-xs uppercase tracking-widest">Apoio WhatsApp</span>
-                </a>
-
-                <button 
-                  onClick={() => { setShowLoginModal(true); setShowMenu(false); }}
-                  className="w-full flex items-center gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-all group"
-                >
+                <button onClick={() => { setShowLoginModal(true); setShowMenu(false); }} className="w-full flex items-center gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-all group">
                   <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center group-hover:bg-red-500 transition-colors">
                     <span className="font-black text-[10px]">HD</span>
                   </div>
@@ -280,7 +255,6 @@ const App: React.FC = () => {
       )}
 
       <main className="max-w-7xl mx-auto w-full p-4 md:p-8 flex-grow">
-        {/* Mobile Search */}
         <div className="md:hidden mb-8 relative group">
           <input 
             type="text" 
@@ -294,7 +268,6 @@ const App: React.FC = () => {
           </svg>
         </div>
 
-        {/* Hero Section */}
         <section className="mb-12 rounded-[2.5rem] overflow-hidden relative min-h-[300px] md:min-h-[400px] flex items-end p-6 md:p-12 shadow-2xl border border-white/5">
           <img src={settings.heroImageUrl} alt="Hero" className="absolute inset-0 object-cover w-full h-full brightness-[0.3]" />
           <div className="relative z-10 max-w-3xl">
@@ -313,7 +286,6 @@ const App: React.FC = () => {
           </div>
         </section>
 
-        {/* Featured Section */}
         <section className="mb-16">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-2 h-8 bg-amber-500 rounded-full" />
@@ -335,7 +307,6 @@ const App: React.FC = () => {
           </div>
         </section>
 
-        {/* Horizontal Filters (Kept for quick access) */}
         <div className="flex gap-3 mb-4 overflow-x-auto pb-2 no-scrollbar">
           {CATEGORIES.map((cat) => (
             <button 
@@ -368,7 +339,6 @@ const App: React.FC = () => {
           ))}
         </div>
 
-        {/* Grid Section */}
         <section className="mb-20">
           <div className="flex items-end justify-between mb-8">
             <h3 className="text-xl font-black text-white tracking-tight uppercase">
@@ -397,19 +367,33 @@ const App: React.FC = () => {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="py-20 border-t border-white/5 flex flex-col items-center gap-4">
-        <div className="flex items-center gap-2 opacity-50 grayscale">
-          <div className="w-8 h-8 rounded-lg bg-slate-800" />
+      <footer className="py-20 border-t border-white/5 flex flex-col items-center gap-8 bg-slate-950">
+        <div className="flex items-center gap-2 opacity-70">
+          <div className="w-8 h-8 rounded-lg" style={{ backgroundColor: settings.accentColor }} />
           <span className="text-sm font-black tracking-tighter uppercase italic">{settings.siteName}</span>
         </div>
-        <div className="text-slate-700 text-[9px] font-black tracking-[0.4em] uppercase">Private Distribution Network</div>
-        <div className="text-slate-800 text-[10px] font-bold uppercase tracking-widest pt-4">
-          {settings.footerText}
+
+        {/* Social Media Links */}
+        <div className="flex items-center gap-6">
+          <a href="https://wa.me/244948352425" target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-green-500 hover:bg-green-500/10 hover:border-green-500/30 transition-all transform hover:-translate-y-1">
+            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.025 3.14l-.904 3.316 3.403-.89c.836.457 1.706.7 2.244.7h.005c3.181 0 5.767-2.586 5.768-5.766 0-3.18-2.586-5.766-5.768-5.766z" /></svg>
+          </a>
+          <a href="https://facebook.com/anonimuzik" target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-blue-500 hover:bg-blue-500/10 hover:border-blue-500/30 transition-all transform hover:-translate-y-1">
+            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z" /></svg>
+          </a>
+          <a href="https://youtube.com/@anonimuzik" target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-500/10 hover:border-red-500/30 transition-all transform hover:-translate-y-1">
+            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" /></svg>
+          </a>
+        </div>
+
+        <div className="flex flex-col items-center gap-2">
+          <div className="text-slate-700 text-[9px] font-black tracking-[0.4em] uppercase">Private Distribution Network</div>
+          <div className="text-slate-400 text-[10px] font-bold uppercase tracking-widest pt-2">
+            {settings.footerText}
+          </div>
         </div>
       </footer>
 
-      {/* About Us Modal */}
       {showAbout && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/98 backdrop-blur-3xl p-6">
           <div className="bg-slate-900 border border-white/10 p-10 rounded-[3rem] w-full max-w-2xl shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-300">
@@ -423,28 +407,13 @@ const App: React.FC = () => {
              <div className="space-y-6 text-slate-300 leading-relaxed font-medium">
                <p>
                  A <span className="text-white font-bold">{settings.siteName}</span> é a maior plataforma de distribuição musical dedicada à preservação e promoção dos ritmos nacionais angolanos. 
-                 Nascemos com a missão de conectar artistas talentosos diretamente com o seu público, sem intermediários desnecessários.
                </p>
-               <p>
-                 Especializados em gêneros como Rap, Kuduro, Afro House, Semba, Kizomba e Zouk, oferecemos um espaço de alta fidelidade para o streaming e download gratuito de música de qualidade superior.
-               </p>
-               <div className="pt-8 mt-4 border-t border-white/5">
-                 <p className="text-amber-500 font-black uppercase text-[10px] tracking-[0.3em] mb-2">Créditos de Desenvolvimento</p>
-                 <p className="text-lg font-black text-white uppercase italic tracking-tighter">Hamilton Almeida Domingos</p>
-                 <p className="text-[10px] mt-1 text-slate-500 font-bold uppercase tracking-widest">Lead Engineer & Architect</p>
-               </div>
-               <button 
-                 onClick={() => setShowAbout(false)}
-                 className="w-full bg-white text-black font-black py-4 rounded-2xl uppercase text-[10px] tracking-widest mt-8 hover:bg-amber-500 transition-all shadow-xl"
-               >
-                 Fechar
-               </button>
+               <button onClick={() => setShowAbout(false)} className="w-full bg-white text-black font-black py-4 rounded-2xl uppercase text-[10px] tracking-widest mt-8 hover:bg-amber-500 transition-all shadow-xl">Fechar</button>
              </div>
           </div>
         </div>
       )}
 
-      {/* Discreet Admin Login Modal */}
       {showLoginModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/98 backdrop-blur-3xl p-4">
           <div className="bg-slate-900 border border-white/10 p-10 rounded-[3rem] w-full max-w-sm shadow-2xl relative overflow-hidden">
@@ -452,11 +421,7 @@ const App: React.FC = () => {
             <h3 className="text-lg font-black mb-8 text-center tracking-widest uppercase text-white/50">Terminal Access</h3>
             <form onSubmit={handleAdminLogin} className="space-y-6">
               <input 
-                type="password"
-                placeholder="TOKEN"
-                autoFocus
-                value={passwordInput}
-                onChange={(e) => setPasswordInput(e.target.value)}
+                type="password" placeholder="TOKEN" autoFocus value={passwordInput} onChange={(e) => setPasswordInput(e.target.value)}
                 className={`w-full bg-black/40 border ${loginError ? 'border-red-500' : 'border-white/10'} p-5 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all text-center tracking-[0.5em] font-black text-2xl placeholder:tracking-normal placeholder:text-slate-800`}
               />
               <div className="flex flex-col gap-3">
@@ -468,14 +433,7 @@ const App: React.FC = () => {
         </div>
       )}
 
-      <Player 
-        song={currentSong}
-        isPlaying={isPlaying}
-        onTogglePlay={() => setIsPlaying(!isPlaying)}
-        onNext={handleNext}
-        onPrev={handlePrev}
-        onDownload={currentSong ? () => handleDownload(currentSong) : undefined}
-      />
+      <Player song={currentSong} isPlaying={isPlaying} onTogglePlay={() => setIsPlaying(!isPlaying)} onNext={handleNext} onPrev={handlePrev} onDownload={currentSong ? () => handleDownload(currentSong) : undefined} />
     </div>
   );
 };
