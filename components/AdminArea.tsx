@@ -37,6 +37,15 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
     fileInputRef.current?.click();
   };
 
+  const shareOnFacebook = (song: Song) => {
+    // Note: In a real app, this would be the actual song URL. 
+    // Since this is a SPA, we use the site URL or a placeholder.
+    const shareUrl = encodeURIComponent(window.location.href);
+    const text = encodeURIComponent(`Ouve agora: ${song.title} - ${song.artist} no ${settings.siteName}!`);
+    const fbShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}&quote=${text}`;
+    window.open(fbShareUrl, '_blank', 'width=600,height=400');
+  };
+
   const handleSubmitSong = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newSong.title || !newSong.audioUrl) return;
@@ -212,9 +221,20 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
                         <td className="p-6 text-center"><button onClick={() => toggleFeatured(song.id)} className={`p-2 transition-all ${song.isFeatured ? 'text-amber-500 scale-110' : 'text-slate-800'}`}><svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></button></td>
                         <td className="p-6 text-center font-mono text-amber-500 font-bold">{song.plays}</td>
                         <td className="p-6 text-center font-mono text-slate-300 font-bold">{song.downloads}</td>
-                        <td className="p-6 text-right flex justify-end gap-2">
-                          <button onClick={() => handleEditClick(song)} className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></button>
-                          <button onClick={() => removeSong(song.id)} className="w-8 h-8 rounded-lg bg-red-900/20 text-red-500 flex items-center justify-center"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                        <td className="p-6 text-right">
+                          <div className="flex justify-end items-center gap-2">
+                            <button 
+                              onClick={() => shareOnFacebook(song)} 
+                              className="w-8 h-8 rounded-lg bg-blue-900/20 text-blue-500 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all"
+                              title="Publicar no Facebook"
+                            >
+                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z" />
+                              </svg>
+                            </button>
+                            <button onClick={() => handleEditClick(song)} className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-blue-500/20 hover:text-blue-400"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></button>
+                            <button onClick={() => removeSong(song.id)} className="w-8 h-8 rounded-lg bg-red-900/20 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                          </div>
                         </td>
                       </tr>
                     ))}
