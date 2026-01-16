@@ -22,6 +22,10 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
     title: '', artist: '', genre: 'Rap', coverUrl: '', audioUrl: '', duration: '3:00', plays: 0, downloads: 0, likes: 0, isFeatured: false
   });
 
+  const getSongPermalink = (id: string) => {
+    return `${window.location.origin}${window.location.pathname}#song=${id}`;
+  };
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -37,11 +41,28 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
     fileInputRef.current?.click();
   };
 
-  const shareOnFacebook = (song: Song) => {
-    const shareUrl = encodeURIComponent(window.location.href);
-    const text = encodeURIComponent(`Ouve agora: ${song.title} - ${song.artist} no ${settings.siteName}!`);
-    const fbShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}&quote=${text}`;
-    window.open(fbShareUrl, '_blank', 'width=600,height=400');
+  const handleUniversalShare = async (song: Song) => {
+    const permalink = getSongPermalink(song.id);
+    const shareData = {
+      title: song.title,
+      text: `Ouve agora: ${song.title} - ${song.artist} no ${settings.siteName}!`,
+      url: permalink,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        console.log('Share failed');
+      }
+    } else {
+      copyPermalink(song.id);
+    }
+  };
+
+  const copyPermalink = (id: string) => {
+    navigator.clipboard.writeText(getSongPermalink(id));
+    alert('Link da música copiado!');
   };
 
   const handleSubmitSong = (e: React.FormEvent) => {
@@ -203,7 +224,6 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
                         <th className="p-6">TRACK</th>
                         <th className="p-6 text-center">FEATURED</th>
                         <th className="p-6 text-center">PLAYS</th>
-                        <th className="p-6 text-center">DWNLDS</th>
                         <th className="p-6 text-center">LIKES</th>
                         <th className="p-6 text-right">MGMT</th>
                       </tr>
@@ -215,7 +235,7 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
                             <img src={song.coverUrl} className="w-12 h-12 rounded-lg object-cover" />
                             <div className="truncate">
                               <div className="font-bold text-white">{song.title}</div>
-                              <div className="text-xs text-slate-500">{song.artist}</div>
+                              <div className="text-[9px] text-slate-500 font-mono mt-1">{getSongPermalink(song.id)}</div>
                             </div>
                           </td>
                           <td className="p-6 text-center">
@@ -224,25 +244,31 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
                             </button>
                           </td>
                           <td className="p-6 text-center font-mono text-amber-500 font-bold">{song.plays}</td>
-                          <td className="p-6 text-center font-mono text-slate-300 font-bold">{song.downloads}</td>
                           <td className="p-6 text-center">
                             <div className="flex flex-col items-center gap-1">
                               <span className="font-mono text-red-500 font-bold">{song.likes}</span>
                               <div className="flex gap-1">
-                                <button onClick={() => updateLikeCount(song.id, Math.max(0, (song.likes || 0) - 1))} className="text-[10px] bg-white/5 p-1 rounded hover:bg-red-500/20">-</button>
-                                <button onClick={() => updateLikeCount(song.id, (song.likes || 0) + 1)} className="text-[10px] bg-white/5 p-1 rounded hover:bg-red-500/20">+</button>
+                                <button onClick={() => updateLikeCount(song.id, Math.max(0, (song.likes || 0) - 1))} className="text-[10px] bg-white/5 p-1 rounded hover:bg-red-500/20 px-2">-</button>
+                                <button onClick={() => updateLikeCount(song.id, (song.likes || 0) + 1)} className="text-[10px] bg-white/5 p-1 rounded hover:bg-red-500/20 px-2">+</button>
                               </div>
                             </div>
                           </td>
                           <td className="p-6 text-right">
                             <div className="flex justify-end items-center gap-2">
                               <button 
-                                onClick={() => shareOnFacebook(song)} 
-                                className="w-9 h-9 rounded-xl bg-blue-600/10 text-blue-500 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all transform hover:scale-110 shadow-lg shadow-blue-600/10"
-                                title="Partilhar no Facebook"
+                                onClick={() => copyPermalink(song.id)} 
+                                className="w-9 h-9 rounded-xl bg-white/5 text-white flex items-center justify-center hover:bg-white/10 transition-all"
+                                title="Copiar Link"
                               >
-                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                  <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z" />
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                              </button>
+                              <button 
+                                onClick={() => handleUniversalShare(song)} 
+                                className="w-9 h-9 rounded-xl bg-slate-800 text-slate-400 flex items-center justify-center hover:bg-slate-700 hover:text-white transition-all transform hover:scale-110"
+                                title="Partilhar"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                                 </svg>
                               </button>
                               <button onClick={() => handleEditClick(song)} className="w-9 h-9 rounded-xl bg-slate-800 text-slate-400 flex items-center justify-center hover:bg-blue-500/20 hover:text-blue-400 transition-all"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></button>

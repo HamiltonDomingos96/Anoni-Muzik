@@ -39,8 +39,7 @@ const App: React.FC = () => {
         isFeatured: s.isFeatured ?? false
       }));
     }
-    // Add likes to mock songs if not present
-    return MOCK_SONGS.map(s => ({ ...s, likes: 0 }));
+    return MOCK_SONGS;
   });
 
   const [settings, setSettings] = useState<SiteSettings>(() => {
@@ -52,6 +51,23 @@ const App: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [performanceFilter, setPerformanceFilter] = useState('Recentes');
+
+  // Handle individual song links on load
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash.startsWith('#song=')) {
+      const songId = hash.replace('#song=', '');
+      const sharedSong = songs.find(s => s.id === songId);
+      if (sharedSong) {
+        setCurrentSong(sharedSong);
+        // Optional: Scroll to the song card
+        setTimeout(() => {
+          const element = document.getElementById(`song-card-${songId}`);
+          element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 500);
+      }
+    }
+  }, [songs]);
 
   useEffect(() => {
     localStorage.setItem('anoni_songs', JSON.stringify(songs));
@@ -301,7 +317,7 @@ const App: React.FC = () => {
           </div>
           <div className="flex gap-4 md:gap-6 overflow-x-auto pb-6 snap-x scroll-smooth no-scrollbar">
             {trendingSongs.map((song) => (
-              <div key={song.id} className="min-w-[240px] md:min-w-[320px] snap-start">
+              <div key={song.id} id={`song-card-${song.id}`} className="min-w-[240px] md:min-w-[320px] snap-start">
                 <MusicCard 
                   song={song}
                   onPlay={handlePlaySong}
@@ -358,15 +374,16 @@ const App: React.FC = () => {
           
           <div className="grid grid-cols-2 gap-4 md:gap-8">
             {filteredAndSortedSongs.map(song => (
-              <MusicCard 
-                key={song.id} 
-                song={song} 
-                onPlay={handlePlaySong}
-                onDownload={() => handleDownload(song)}
-                onLike={() => handleLike(song.id)}
-                isCurrent={currentSong?.id === song.id}
-                isPlaying={isPlaying && currentSong?.id === song.id}
-              />
+              <div key={song.id} id={`song-card-${song.id}`}>
+                <MusicCard 
+                  song={song} 
+                  onPlay={handlePlaySong}
+                  onDownload={() => handleDownload(song)}
+                  onLike={() => handleLike(song.id)}
+                  isCurrent={currentSong?.id === song.id}
+                  isPlaying={isPlaying && currentSong?.id === song.id}
+                />
+              </div>
             ))}
           </div>
           {filteredAndSortedSongs.length === 0 && (
