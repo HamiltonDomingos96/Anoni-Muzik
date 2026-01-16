@@ -41,6 +41,26 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
     fileInputRef.current?.click();
   };
 
+  const handleUniversalShare = async (song: Song) => {
+    const permalink = getSongPermalink(song.id);
+    const shareData = {
+      title: song.title,
+      text: `Ouve agora: ${song.title} - ${song.artist} no ${settings.siteName}!`,
+      url: permalink,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        console.log('Share failed');
+      }
+    } else {
+      navigator.clipboard.writeText(permalink);
+      alert('Link da música copiado!');
+    }
+  };
+
   const handleSubmitSong = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newSong.title || !newSong.audioUrl) return;
@@ -62,11 +82,26 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
     setNewSong({ title: '', artist: '', genre: 'Rap', coverUrl: '', audioUrl: '', duration: '3:00', plays: 0, downloads: 0, likes: 0, isFeatured: false });
   };
 
-  // Fix: Added removeSong function
+  const handleEditClick = (song: Song) => {
+    setEditingId(song.id);
+    setNewSong(song);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setNewSong({ title: '', artist: '', genre: 'Rap', coverUrl: '', audioUrl: '', duration: '3:00', plays: 0, downloads: 0, likes: 0, isFeatured: false });
+  };
+
   const removeSong = (id: string) => {
-    if (window.confirm('Tens a certeza que desejas remover esta música?')) {
+    if (window.confirm('Deseja eliminar permanentemente esta faixa?')) {
       setSongs(prev => prev.filter(s => s.id !== id));
+      if (editingId === id) cancelEdit();
     }
+  };
+
+  const toggleFeatured = (id: string) => {
+    setSongs(songs.map(s => s.id === id ? { ...s, isFeatured: !s.isFeatured } : s));
   };
 
   const updateMetric = (id: string, field: 'plays' | 'downloads' | 'likes', newValue: number) => {
@@ -88,7 +123,6 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
     };
   }, [songs, analyticsTimeframe]);
 
-  // Ranking de progresso das músicas
   const rankingData = useMemo(() => {
     return [...songs].sort((a, b) => {
       const scoreA = (a.plays * 1) + (a.downloads * 2) + (a.likes * 3);
@@ -111,7 +145,7 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
             <div className="w-8 h-8 rounded bg-amber-500 flex items-center justify-center">
               <span className="font-black text-black text-xs">HD</span>
             </div>
-            <h2 className="text-xl font-black uppercase tracking-tighter">CORE CMS</h2>
+            <h2 className="text-xl font-black uppercase tracking-tighter text-white">CORE CMS</h2>
           </div>
           <nav className="flex bg-black/40 p-1 rounded-xl overflow-x-auto no-scrollbar">
             {['songs', 'ranking', 'analytics', 'settings'].map((tab) => (
@@ -128,7 +162,7 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
         <div className="flex items-center gap-4">
           <div className="flex flex-col items-end">
             <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest">{siteStats.realTotalPlays} PLAYS GLOBAIS</span>
-            <span className="hidden md:block text-[9px] font-black uppercase tracking-widest text-slate-600">Hamilton Almeida Domingos</span>
+            <span className="hidden md:block text-[9px] font-black uppercase tracking-widest text-slate-600">Admin: Hamilton Almeida Domingos</span>
           </div>
           <button onClick={onClose} className="bg-slate-800 hover:bg-white hover:text-black px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all">Sair</button>
         </div>
@@ -160,33 +194,17 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
                         #{String(idx + 1).padStart(2, '0')}
                       </span>
                     </div>
-                    
                     <img src={song.coverUrl} className="w-12 h-12 md:w-16 md:h-16 rounded-xl object-cover shadow-2xl" />
-                    
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-3">
                         <div>
                           <h4 className="font-black text-white uppercase text-sm md:text-base truncate tracking-tight">{song.title}</h4>
                           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{song.artist}</p>
                         </div>
-                        <div className="flex items-center gap-4 text-[9px] font-black text-slate-400 uppercase">
-                          <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-amber-500"/> {song.plays} PLAYS</span>
-                          <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-white"/> {song.downloads} DWN</span>
-                          <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-red-500"/> {song.likes} LIKES</span>
-                        </div>
                       </div>
-                      
                       <div className="relative h-2 bg-black/40 rounded-full overflow-hidden">
-                        <div 
-                          className={`absolute top-0 left-0 h-full transition-all duration-1000 ease-out ${idx === 0 ? 'bg-gradient-to-r from-amber-600 to-amber-400' : 'bg-slate-600'}`}
-                          style={{ width: `${progressWidth}%` }}
-                        />
+                        <div className={`absolute top-0 left-0 h-full transition-all duration-1000 ease-out ${idx === 0 ? 'bg-gradient-to-r from-amber-600 to-amber-400' : 'bg-slate-600'}`} style={{ width: `${progressWidth}%` }} />
                       </div>
-                    </div>
-
-                    <div className="hidden md:flex flex-col items-end w-24">
-                      <span className="text-[10px] font-black text-slate-500 uppercase mb-1">Impacto</span>
-                      <span className="text-sm font-mono font-black text-white">{currentScore.toLocaleString()}</span>
                     </div>
                   </div>
                 );
@@ -202,192 +220,135 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
               </h3>
               <form onSubmit={handleSubmitSong} className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="md:row-span-2 flex flex-col items-center justify-center space-y-3">
-                  <label className="text-[10px] font-black uppercase text-slate-500 self-start">Capa da Música</label>
                   <div onClick={triggerFileUpload} className="w-full aspect-square bg-black border-2 border-dashed border-white/10 rounded-3xl flex flex-col items-center justify-center cursor-pointer group hover:border-amber-500/50 transition-all overflow-hidden relative">
                     {newSong.coverUrl ? (
-                      <>
-                        <img src={newSong.coverUrl} className="w-full h-full object-cover" alt="Preview" />
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                          <span className="text-[10px] font-black uppercase text-white bg-black/50 px-4 py-2 rounded-full">Trocar Imagem</span>
-                        </div>
-                      </>
+                      <img src={newSong.coverUrl} className="w-full h-full object-cover" alt="Preview" />
                     ) : (
-                      <>
-                        <svg className="w-8 h-8 text-slate-600 group-hover:text-amber-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                        <span className="text-[10px] font-black uppercase text-slate-600">Galeria</span>
-                      </>
+                      <span className="text-[10px] font-black uppercase text-slate-600">Capa da Track</span>
                     )}
                   </div>
                   <input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/*" className="hidden" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase text-slate-500">Título</label>
-                  <input type="text" placeholder="Título" className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:ring-1 focus:ring-amber-500 text-sm" value={newSong.title} onChange={e => setNewSong({...newSong, title: e.target.value})} />
+                  <input type="text" placeholder="Título" className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:ring-1 focus:ring-amber-500 text-sm text-white" value={newSong.title} onChange={e => setNewSong({...newSong, title: e.target.value})} />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase text-slate-500">Artista</label>
-                  <input type="text" placeholder="Artista" className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:ring-1 focus:ring-amber-500 text-sm" value={newSong.artist} onChange={e => setNewSong({...newSong, artist: e.target.value})} />
+                  <input type="text" placeholder="Artista" className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:ring-1 focus:ring-amber-500 text-sm text-white" value={newSong.artist} onChange={e => setNewSong({...newSong, artist: e.target.value})} />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase text-slate-500">Gênero</label>
-                  <select className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:ring-1 focus:ring-amber-500 appearance-none text-sm" value={newSong.genre} onChange={e => setNewSong({...newSong, genre: e.target.value})}>
+                  <select className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:ring-1 focus:ring-amber-500 appearance-none text-sm text-white" value={newSong.genre} onChange={e => setNewSong({...newSong, genre: e.target.value})}>
                     {GENRES.map(g => <option key={g} value={g}>{g}</option>)}
                   </select>
                 </div>
                 <div className="md:col-span-1 space-y-2">
                   <label className="text-[10px] font-black uppercase text-slate-500">URL Áudio</label>
-                  <input type="text" placeholder="URL .mp3" className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:ring-1 focus:ring-amber-500 text-sm" value={newSong.audioUrl} onChange={e => setNewSong({...newSong, audioUrl: e.target.value})} />
+                  <input type="text" placeholder="URL .mp3" className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:ring-1 focus:ring-amber-500 text-sm text-white" value={newSong.audioUrl} onChange={e => setNewSong({...newSong, audioUrl: e.target.value})} />
                 </div>
                 <div className="md:col-span-1 space-y-2">
-                  <label className="text-[10px] font-black uppercase text-slate-500">Plays Iniciais</label>
-                  <input type="number" className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:ring-1 focus:ring-amber-500 text-sm" value={newSong.plays} onChange={e => setNewSong({...newSong, plays: parseInt(e.target.value) || 0})} />
+                  <label className="text-[10px] font-black uppercase text-slate-500">Plays</label>
+                  <input type="number" className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:ring-1 focus:ring-amber-500 text-sm text-white" value={newSong.plays} onChange={e => setNewSong({...newSong, plays: parseInt(e.target.value) || 0})} />
                 </div>
                 <div className="md:col-span-1 space-y-2">
-                   <label className="text-[10px] font-black uppercase text-slate-500">Likes Iniciais</label>
-                   <input type="number" className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:ring-1 focus:ring-amber-500 text-sm" value={newSong.likes} onChange={e => setNewSong({...newSong, likes: parseInt(e.target.value) || 0})} />
+                   <label className="text-[10px] font-black uppercase text-slate-500">Likes</label>
+                   <input type="number" className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:ring-1 focus:ring-amber-500 text-sm text-white" value={newSong.likes} onChange={e => setNewSong({...newSong, likes: parseInt(e.target.value) || 0})} />
                 </div>
                 <div className="md:col-span-3 flex justify-end items-center gap-6 mt-4">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" checked={newSong.isFeatured} onChange={e => setNewSong({...newSong, isFeatured: e.target.checked})} className="w-5 h-5 rounded-lg bg-black border-white/10 text-amber-500" />
                     <span className="text-[10px] font-black uppercase text-slate-500">Destaque</span>
                   </label>
+                  {editingId && (
+                    <button type="button" onClick={cancelEdit} className="bg-slate-800 text-white font-black py-4 px-12 rounded-2xl uppercase text-xs">Cancelar</button>
+                  )}
                   <button type="submit" className={`${editingId ? 'bg-blue-600' : 'bg-amber-500'} text-black font-black py-4 px-12 rounded-2xl uppercase text-xs shadow-xl`}>
-                    {editingId ? 'Guardar' : 'Publicar'}
+                    {editingId ? 'Atualizar Track' : 'Publicar Track'}
                   </button>
                 </div>
               </form>
             </section>
 
-            <section>
-              <div className="bg-slate-900 border border-white/5 rounded-[2rem] overflow-hidden shadow-xl">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left">
-                    <thead className="bg-black/40 text-slate-500 text-[10px] font-black uppercase border-b border-white/5">
-                      <tr>
-                        <th className="p-6">TRACK</th>
-                        <th className="p-6 text-center">FEATURED</th>
-                        <th className="p-6 text-center">PLAYS</th>
-                        <th className="p-6 text-center">DWNLDS</th>
-                        <th className="p-6 text-center">LIKES</th>
-                        <th className="p-6 text-right">MGMT</th>
+            <section className="bg-slate-900 border border-white/5 rounded-[2rem] overflow-hidden shadow-xl">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead className="bg-black/40 text-slate-500 text-[10px] font-black uppercase border-b border-white/5">
+                    <tr>
+                      <th className="p-6">TRACK</th>
+                      <th className="p-6 text-center">FEATURED</th>
+                      <th className="p-6 text-center">PLAYS</th>
+                      <th className="p-6 text-center">LIKES</th>
+                      <th className="p-6 text-right">MGMT</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {songs.map(song => (
+                      <tr key={song.id} className="hover:bg-white/[0.02]">
+                        <td className="p-6 flex items-center gap-4">
+                          <img src={song.coverUrl} className="w-12 h-12 rounded-lg object-cover" />
+                          <div>
+                            <div className="font-bold text-white truncate max-w-[150px]">{song.title}</div>
+                            <div className="text-[9px] text-slate-500 font-mono mt-1">{song.artist}</div>
+                          </div>
+                        </td>
+                        <td className="p-6 text-center">
+                          <button onClick={() => toggleFeatured(song.id)} className={`p-2 transition-all ${song.isFeatured ? 'text-amber-500 scale-110' : 'text-slate-800'}`}>
+                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                          </button>
+                        </td>
+                        <td className="p-6 text-center">
+                          <div className="flex flex-col items-center gap-1">
+                            <span className="font-mono text-amber-500 font-bold">{song.plays}</span>
+                            <div className="flex gap-1">
+                              <button onClick={() => updateMetric(song.id, 'plays', song.plays - 1)} className="text-[10px] bg-white/5 p-1 rounded hover:bg-amber-500/20 px-2">-</button>
+                              <button onClick={() => updateMetric(song.id, 'plays', song.plays + 1)} className="text-[10px] bg-white/5 p-1 rounded hover:bg-amber-500/20 px-2">+</button>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-6 text-center">
+                          <div className="flex flex-col items-center gap-1">
+                            <span className="font-mono text-red-500 font-bold">{song.likes}</span>
+                            <div className="flex gap-1">
+                              <button onClick={() => updateMetric(song.id, 'likes', song.likes - 1)} className="text-[10px] bg-white/5 p-1 rounded hover:bg-red-500/20 px-2">-</button>
+                              <button onClick={() => updateMetric(song.id, 'likes', song.likes + 1)} className="text-[10px] bg-white/5 p-1 rounded hover:bg-red-500/20 px-2">+</button>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-6 text-right">
+                          <div className="flex justify-end gap-2">
+                             <button onClick={() => handleUniversalShare(song)} className="w-9 h-9 rounded-xl bg-slate-800 text-slate-400 flex items-center justify-center hover:bg-slate-700 hover:text-white" title="Partilhar"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg></button>
+                             <button onClick={() => handleEditClick(song)} className="w-9 h-9 rounded-xl bg-blue-900/20 text-blue-500 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all" title="Editar"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></button>
+                             <button onClick={() => removeSong(song.id)} className="w-9 h-9 rounded-xl bg-red-900/20 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all" title="Eliminar"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                          </div>
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                      {songs.map(song => (
-                        <tr key={song.id} className="hover:bg-white/[0.02]">
-                          <td className="p-6 flex items-center gap-4">
-                            <img src={song.coverUrl} className="w-12 h-12 rounded-lg object-cover" />
-                            <div className="truncate max-w-[200px]">
-                              <div className="font-bold text-white truncate">{song.title}</div>
-                              <div className="text-[9px] text-slate-500 font-mono mt-1 truncate">{song.artist}</div>
-                            </div>
-                          </td>
-                          <td className="p-6 text-center">
-                            <button onClick={() => updateMetric(song.id, 'plays', song.plays + 1)} className={`p-2 transition-all ${song.isFeatured ? 'text-amber-500 scale-110' : 'text-slate-800'}`}>
-                              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                            </button>
-                          </td>
-                          <td className="p-6 text-center">
-                            <div className="flex flex-col items-center gap-1">
-                              <span className="font-mono text-amber-500 font-bold">{song.plays}</span>
-                              <div className="flex gap-1">
-                                <button onClick={() => updateMetric(song.id, 'plays', song.plays - 1)} className="text-[10px] bg-white/5 p-1 rounded hover:bg-amber-500 hover:text-black transition-colors px-2">-</button>
-                                <button onClick={() => updateMetric(song.id, 'plays', song.plays + 1)} className="text-[10px] bg-white/5 p-1 rounded hover:bg-amber-500 hover:text-black transition-colors px-2">+</button>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="p-6 text-center">
-                            <div className="flex flex-col items-center gap-1">
-                              <span className="font-mono text-slate-300 font-bold">{song.downloads}</span>
-                              <div className="flex gap-1">
-                                <button onClick={() => updateMetric(song.id, 'downloads', song.downloads - 1)} className="text-[10px] bg-white/5 p-1 rounded hover:bg-white/20 transition-colors px-2">-</button>
-                                <button onClick={() => updateMetric(song.id, 'downloads', song.downloads + 1)} className="text-[10px] bg-white/5 p-1 rounded hover:bg-white/20 transition-colors px-2">+</button>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="p-6 text-center">
-                            <div className="flex flex-col items-center gap-1">
-                              <span className="font-mono text-red-500 font-bold">{song.likes}</span>
-                              <div className="flex gap-1">
-                                <button onClick={() => updateMetric(song.id, 'likes', song.likes - 1)} className="text-[10px] bg-white/5 p-1 rounded hover:bg-red-500 hover:text-white transition-colors px-2">-</button>
-                                <button onClick={() => updateMetric(song.id, 'likes', song.likes + 1)} className="text-[10px] bg-white/5 p-1 rounded hover:bg-red-500 hover:text-white transition-colors px-2">+</button>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="p-6 text-right">
-                             <div className="flex justify-end gap-2">
-                                <button onClick={() => removeSong(song.id)} className="w-9 h-9 rounded-xl bg-red-900/20 text-red-500 flex items-center justify-center hover:bg-red-500 transition-all"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
-                             </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </section>
           </div>
         ) : activeTab === 'analytics' ? (
           <div className="space-y-10 animate-in fade-in duration-500">
-            <div className="flex justify-center mb-8">
-              <div className="bg-slate-900 p-1 rounded-2xl flex border border-white/5">
-                {['daily', 'weekly', 'monthly'].map(tf => (
-                  <button 
-                    key={tf} 
-                    onClick={() => setAnalyticsTimeframe(tf as any)} 
-                    className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${analyticsTimeframe === tf ? 'bg-white text-black' : 'text-slate-500 hover:text-slate-300'}`}
-                  >
-                    {tf === 'daily' ? 'Hoje' : tf === 'weekly' ? 'Semana' : 'Mês'}
-                  </button>
-                ))}
-              </div>
-            </div>
-            
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="bg-slate-900 p-8 rounded-[2rem] border border-white/5 shadow-xl relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-4 opacity-10 transition-opacity group-hover:opacity-30">
-                  <svg className="w-16 h-16 text-amber-500" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                </div>
+              <div className="bg-slate-900 p-8 rounded-[2rem] border border-white/5 shadow-xl group">
                 <p className="text-slate-500 text-[9px] font-black uppercase mb-4 tracking-widest">Plays Totais</p>
-                <div className="text-4xl font-black text-amber-500">{siteStats.totalPlays.toLocaleString()}</div>
-                <p className="text-[9px] text-slate-600 mt-2 font-bold italic">Baseado no catálogo atual</p>
+                <div className="text-4xl font-black text-amber-500">{siteStats.realTotalPlays.toLocaleString()}</div>
               </div>
-              
-              <div className="bg-slate-900 p-8 rounded-[2rem] border border-white/5 shadow-xl relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-4 opacity-10 transition-opacity group-hover:opacity-30">
-                  <svg className="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                </div>
-                <p className="text-slate-500 text-[9px] font-black uppercase mb-4 tracking-widest">Downloads</p>
-                <div className="text-4xl font-black text-white">{siteStats.totalDownloads.toLocaleString()}</div>
-                <p className="text-[9px] text-slate-600 mt-2 font-bold italic">Impacto de distribuição</p>
-              </div>
-              
-              <div className="bg-slate-900 p-8 rounded-[2rem] border border-white/5 shadow-xl relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-4 opacity-10 transition-opacity group-hover:opacity-30">
-                  <svg className="w-16 h-16 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                </div>
+              <div className="bg-slate-900 p-8 rounded-[2rem] border border-white/5 shadow-xl">
                 <p className="text-slate-500 text-[9px] font-black uppercase mb-4 tracking-widest">Favoritos</p>
-                <div className="text-4xl font-black text-red-500">{siteStats.totalLikes.toLocaleString()}</div>
-                <p className="text-[9px] text-slate-600 mt-2 font-bold italic">Satisfação da audiência</p>
-              </div>
-              
-              <div className="bg-slate-900 p-8 rounded-[2rem] border border-white/5 shadow-xl relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-4 opacity-10 transition-opacity group-hover:opacity-30">
-                  <svg className="w-16 h-16 text-slate-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-                </div>
-                <p className="text-slate-500 text-[9px] font-black uppercase mb-4 tracking-widest">Ativos</p>
-                <div className="text-4xl font-black text-slate-400">{songs.length}</div>
-                <p className="text-[9px] text-slate-600 mt-2 font-bold italic">Tracks no servidor</p>
+                <div className="text-4xl font-black text-red-500">{siteStats.realTotalLikes.toLocaleString()}</div>
               </div>
             </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 animate-in slide-in-from-bottom-4 duration-500">
             <section className="bg-slate-900 p-8 rounded-[2rem] border border-white/5 shadow-xl">
-              <h3 className="text-xl font-black mb-8 uppercase text-amber-500">Identidade</h3>
+              <h3 className="text-xl font-black mb-8 uppercase text-amber-500">Template</h3>
               <div className="space-y-6">
-                <div className="space-y-2"><label className="text-[10px] font-black uppercase text-slate-500">Nome Site</label><input type="text" value={settings.siteName} onChange={e => setSettings({...settings, siteName: e.target.value})} className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none text-sm" /></div>
-                <div className="space-y-2"><label className="text-[10px] font-black uppercase text-slate-500">Rodapé</label><input type="text" value={settings.footerText} onChange={e => setSettings({...settings, footerText: e.target.value})} className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none text-sm" /></div>
+                <div className="space-y-2"><label className="text-[10px] font-black uppercase text-slate-500">Nome Site</label><input type="text" value={settings.siteName} onChange={e => setSettings({...settings, siteName: e.target.value})} className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none text-sm text-white" /></div>
+                <div className="space-y-2"><label className="text-[10px] font-black uppercase text-slate-500">Rodapé</label><input type="text" value={settings.footerText} onChange={e => setSettings({...settings, footerText: e.target.value})} className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none text-sm text-white" /></div>
               </div>
             </section>
           </div>
