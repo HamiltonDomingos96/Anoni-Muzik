@@ -13,42 +13,48 @@ interface MusicCardProps {
 const MusicCard: React.FC<MusicCardProps> = ({ song, onPlay, onDownload, isCurrent, isPlaying }) => {
   return (
     <div 
-      className={`group relative p-4 rounded-xl transition-all duration-300 cursor-pointer ${
-        isCurrent ? 'bg-indigo-600/20 ring-1 ring-indigo-500' : 'bg-slate-800/50 hover:bg-slate-800'
+      className={`group relative p-3 rounded-[1.5rem] transition-all duration-500 cursor-pointer overflow-hidden ${
+        isCurrent ? 'bg-amber-500/10 ring-1 ring-amber-500/30' : 'bg-slate-900/50 hover:bg-slate-900 border border-white/5'
       }`}
       onClick={() => onPlay(song)}
     >
-      <div className="relative aspect-square mb-4 overflow-hidden rounded-lg">
+      <div className="relative aspect-square mb-4 overflow-hidden rounded-2xl shadow-2xl">
         <img 
           src={song.coverUrl} 
           alt={song.title} 
-          className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
+          className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-105"
+          loading="lazy"
         />
-        <div className={`absolute inset-0 flex items-center justify-center bg-black/40 transition-opacity duration-300 ${
+        <div className={`absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px] transition-opacity duration-300 ${
           isCurrent && isPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
         }`}>
-          <div className="w-14 h-14 bg-indigo-500 rounded-full flex items-center justify-center shadow-2xl transform transition-transform group-hover:scale-110 active:scale-95">
+          <div className="w-16 h-16 bg-white text-black rounded-full flex items-center justify-center shadow-2xl transform transition-transform group-hover:scale-110 active:scale-90">
             {isCurrent && isPlaying ? (
-               <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+               <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
                  <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
                </svg>
             ) : (
-               <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+               <svg className="w-8 h-8 ml-1" fill="currentColor" viewBox="0 0 24 24">
                  <path d="M8 5v14l11-7z"/>
                </svg>
             )}
           </div>
         </div>
+        <div className="absolute top-3 left-3">
+          <span className="px-3 py-1 text-[9px] font-black uppercase tracking-widest bg-black/80 text-amber-500 backdrop-blur-md rounded-lg border border-white/10">
+            {song.genre}
+          </span>
+        </div>
       </div>
       
-      <div className="flex justify-between items-start">
+      <div className="flex justify-between items-center px-1 pb-1">
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-slate-100 truncate pr-2">{song.title}</h3>
-          <p className="text-sm text-slate-400 truncate">{song.artist}</p>
+          <h3 className="font-bold text-white truncate text-base tracking-tight">{song.title}</h3>
+          <p className="text-xs text-slate-500 font-medium truncate uppercase tracking-tighter">{song.artist}</p>
         </div>
         <button 
           onClick={(e) => { e.stopPropagation(); onDownload(); }}
-          className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-full transition-colors flex-shrink-0"
+          className="ml-3 p-3 bg-white/5 text-slate-400 hover:text-white hover:bg-amber-500 hover:text-black rounded-xl transition-all active:scale-90"
           title="Baixar MP3"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -56,9 +62,6 @@ const MusicCard: React.FC<MusicCardProps> = ({ song, onPlay, onDownload, isCurre
           </svg>
         </button>
       </div>
-      <span className="inline-block mt-2 px-2 py-0.5 text-[10px] uppercase tracking-wider font-bold bg-slate-700 text-slate-300 rounded">
-        {song.genre}
-      </span>
     </div>
   );
 };

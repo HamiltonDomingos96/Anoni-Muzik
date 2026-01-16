@@ -10,10 +10,12 @@ interface AdminAreaProps {
   onClose: () => void;
 }
 
+const GENRES = ['Rap', 'Kuduro', 'Afro House', 'Semba', 'Kizomba', 'Zouk'];
+
 const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSettings, onClose }) => {
   const [activeTab, setActiveTab] = useState<'songs' | 'settings' | 'analytics'>('songs');
   const [newSong, setNewSong] = useState<Partial<Song>>({
-    title: '', artist: '', genre: 'Electronic', coverUrl: '', audioUrl: '', duration: '3:00', plays: 0, downloads: 0
+    title: '', artist: '', genre: 'Rap', coverUrl: '', audioUrl: '', duration: '3:00', plays: 0, downloads: 0
   });
 
   const handleAddSong = (e: React.FormEvent) => {
@@ -26,11 +28,11 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
       downloads: 0
     };
     setSongs([songToAdd, ...songs]);
-    setNewSong({ title: '', artist: '', genre: 'Electronic', coverUrl: '', audioUrl: '', duration: '3:00', plays: 0, downloads: 0 });
+    setNewSong({ title: '', artist: '', genre: 'Rap', coverUrl: '', audioUrl: '', duration: '3:00', plays: 0, downloads: 0 });
   };
 
   const removeSong = (id: string) => {
-    if (confirm('Tem certeza que deseja remover esta música?')) {
+    if (confirm('Deseja eliminar permanentemente esta faixa?')) {
       setSongs(songs.filter(s => s.id !== id));
     }
   };
@@ -43,71 +45,96 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
   const totalDownloads = songs.reduce((acc, s) => acc + (s.downloads || 0), 0);
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
-      <header className="bg-slate-800 border-b border-slate-700 p-4 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <h2 className="text-xl font-bold flex items-center gap-2">
-            <span className="p-1.5 bg-indigo-600 rounded">
-               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /></svg>
-            </span>
-            Painel Admin
-          </h2>
-          <nav className="flex gap-2 ml-8">
-            <button onClick={() => setActiveTab('songs')} className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${activeTab === 'songs' ? 'bg-indigo-600 text-white' : 'hover:bg-slate-700 text-slate-400'}`}>Músicas</button>
-            <button onClick={() => setActiveTab('analytics')} className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${activeTab === 'analytics' ? 'bg-indigo-600 text-white' : 'hover:bg-slate-700 text-slate-400'}`}>Estatísticas</button>
-            <button onClick={() => setActiveTab('settings')} className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${activeTab === 'settings' ? 'bg-indigo-600 text-white' : 'hover:bg-slate-700 text-slate-400'}`}>Configurações</button>
+    <div className="min-h-screen bg-black text-slate-100 flex flex-col font-sans">
+      <header className="bg-slate-900/50 backdrop-blur-md border-b border-white/5 p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded bg-amber-500 flex items-center justify-center">
+              <svg className="w-5 h-5 text-black" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+            </div>
+            <h2 className="text-xl font-black uppercase tracking-tighter">CORE CMS</h2>
+          </div>
+          <nav className="flex bg-black/40 p-1 rounded-xl">
+            {['songs', 'analytics', 'settings'].map((tab) => (
+              <button 
+                key={tab}
+                onClick={() => setActiveTab(tab as any)} 
+                className={`px-6 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${activeTab === tab ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'text-slate-500 hover:text-white'}`}
+              >
+                {tab === 'songs' ? 'Músicas' : tab === 'analytics' ? 'Dados' : 'Template'}
+              </button>
+            ))}
           </nav>
         </div>
-        <button onClick={onClose} className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2">Sair do Painel</button>
+        <button onClick={onClose} className="bg-slate-800 hover:bg-white hover:text-black px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all">Fechar Painel</button>
       </header>
 
-      <main className="flex-1 overflow-y-auto p-6 max-w-6xl mx-auto w-full">
+      <main className="flex-1 overflow-y-auto p-4 md:p-10 max-w-7xl mx-auto w-full">
         {activeTab === 'songs' ? (
-          <div className="space-y-8">
-            <section className="bg-slate-800 p-6 rounded-2xl border border-slate-700">
-              <h3 className="text-lg font-bold mb-4">Adicionar Nova Música</h3>
-              <form onSubmit={handleAddSong} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input type="text" placeholder="Título" className="bg-slate-900 border border-slate-700 p-3 rounded-xl outline-none" value={newSong.title} onChange={e => setNewSong({...newSong, title: e.target.value})} />
-                <input type="text" placeholder="Artista" className="bg-slate-900 border border-slate-700 p-3 rounded-xl outline-none" value={newSong.artist} onChange={e => setNewSong({...newSong, artist: e.target.value})} />
-                <input type="text" placeholder="URL do Áudio (MP3)" className="bg-slate-900 border border-slate-700 p-3 rounded-xl outline-none" value={newSong.audioUrl} onChange={e => setNewSong({...newSong, audioUrl: e.target.value})} />
-                <input type="text" placeholder="URL da Capa" className="bg-slate-900 border border-slate-700 p-3 rounded-xl outline-none" value={newSong.coverUrl} onChange={e => setNewSong({...newSong, coverUrl: e.target.value})} />
-                <select className="bg-slate-900 border border-slate-700 p-3 rounded-xl outline-none" value={newSong.genre} onChange={e => setNewSong({...newSong, genre: e.target.value})}>
-                  <option>Regional</option><option>Electronic</option><option>Synthwave</option><option>Hip Hop</option><option>Acoustic</option><option>Ambient</option>
-                </select>
-                <button type="submit" className="bg-indigo-600 font-bold p-3 rounded-xl">Salvar Música</button>
+          <div className="space-y-12">
+            <section className="bg-slate-900 border border-white/5 p-8 rounded-[2rem] shadow-2xl">
+              <h3 className="text-xl font-black mb-6 uppercase tracking-tight text-amber-500">Novo Lançamento</h3>
+              <form onSubmit={handleAddSong} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-slate-500">Título da Track</label>
+                  <input type="text" placeholder="Ex: Zigue-Zague" className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:ring-1 focus:ring-amber-500 transition-all" value={newSong.title} onChange={e => setNewSong({...newSong, title: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-slate-500">Artista / Grupo</label>
+                  <input type="text" placeholder="Ex: Caudilho" className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:ring-1 focus:ring-amber-500 transition-all" value={newSong.artist} onChange={e => setNewSong({...newSong, artist: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-slate-500">Gênero</label>
+                  <select className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:ring-1 focus:ring-amber-500 transition-all appearance-none" value={newSong.genre} onChange={e => setNewSong({...newSong, genre: e.target.value})}>
+                    {GENRES.map(g => <option key={g} value={g}>{g}</option>)}
+                  </select>
+                </div>
+                <div className="md:col-span-2 space-y-2">
+                  <label className="text-[10px] font-black uppercase text-slate-500">URL do Arquivo MP3</label>
+                  <input type="text" placeholder="https://..." className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:ring-1 focus:ring-amber-500 transition-all" value={newSong.audioUrl} onChange={e => setNewSong({...newSong, audioUrl: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-slate-500">URL da Capa (1:1)</label>
+                  <input type="text" placeholder="https://..." className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:ring-1 focus:ring-amber-500 transition-all" value={newSong.coverUrl} onChange={e => setNewSong({...newSong, coverUrl: e.target.value})} />
+                </div>
+                <div className="md:col-span-3 flex justify-end">
+                  <button type="submit" className="bg-amber-500 text-black font-black py-4 px-12 rounded-2xl uppercase text-xs hover:bg-white transition-all transform hover:-translate-y-1">Publicar Agora</button>
+                </div>
               </form>
             </section>
 
             <section>
-              <h3 className="text-lg font-bold mb-4">Gerenciar Músicas</h3>
-              <div className="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead className="bg-slate-700/50 text-slate-400 text-xs uppercase">
+              <h3 className="text-xl font-black mb-6 uppercase tracking-tight">Acervo Musical</h3>
+              <div className="bg-slate-900 border border-white/5 rounded-[2rem] overflow-hidden shadow-xl">
+                <table className="w-full text-left">
+                  <thead className="bg-black/40 text-slate-500 text-[10px] font-black uppercase tracking-widest">
                     <tr>
-                      <th className="p-4 font-medium">Faixa</th>
-                      <th className="p-4 font-medium text-center">Plays</th>
-                      <th className="p-4 font-medium text-center">Downloads</th>
-                      <th className="p-4 font-medium text-right">Ações</th>
+                      <th className="p-6">TRACK DETAILS</th>
+                      <th className="p-6 text-center">PLAYS</th>
+                      <th className="p-6 text-center">DWNLDS</th>
+                      <th className="p-6 text-right">MGMT</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-700">
+                  <tbody className="divide-y divide-white/5">
                     {songs.map(song => (
-                      <tr key={song.id} className="hover:bg-slate-700/30">
-                        <td className="p-4 flex items-center gap-3">
-                          <img src={song.coverUrl} className="w-10 h-10 rounded object-cover" />
-                          <div>
-                            <div className="font-medium">{song.title}</div>
-                            <div className="text-xs text-slate-400">{song.artist}</div>
+                      <tr key={song.id} className="hover:bg-white/[0.02] transition-colors">
+                        <td className="p-6">
+                          <div className="flex items-center gap-4">
+                            <img src={song.coverUrl} className="w-12 h-12 rounded-lg object-cover bg-black" />
+                            <div>
+                              <div className="font-bold text-white">{song.title}</div>
+                              <div className="text-xs text-slate-500">{song.artist} • <span className="text-amber-500">{song.genre}</span></div>
+                            </div>
                           </div>
                         </td>
-                        <td className="p-4 text-center font-mono text-indigo-400">{song.plays || 0}</td>
-                        <td className="p-4 text-center font-mono text-emerald-400">{song.downloads || 0}</td>
-                        <td className="p-4 text-right space-x-2">
-                          <button onClick={() => resetStats(song.id)} className="text-slate-400 hover:text-white p-2" title="Zerar Stats">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                        <td className="p-6 text-center font-mono text-amber-500 text-lg font-bold">{song.plays || 0}</td>
+                        <td className="p-6 text-center font-mono text-slate-300 text-lg font-bold">{song.downloads || 0}</td>
+                        <td className="p-6 text-right space-x-2">
+                          <button onClick={() => resetStats(song.id)} className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center hover:bg-white hover:text-black transition-all" title="Reset Stats">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
                           </button>
-                          <button onClick={() => removeSong(song.id)} className="text-red-400 hover:text-red-300 p-2" title="Excluir">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                          <button onClick={() => removeSong(song.id)} className="w-10 h-10 rounded-xl bg-red-900/20 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all" title="Delete">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                           </button>
                         </td>
                       </tr>
@@ -118,72 +145,67 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
             </section>
           </div>
         ) : activeTab === 'analytics' ? (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700">
-                <p className="text-slate-400 text-sm mb-1 uppercase font-bold tracking-wider">Total de Plays</p>
-                <h4 className="text-4xl font-black text-indigo-400">{totalPlays}</h4>
+          <div className="space-y-10">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="bg-slate-900 p-8 rounded-[2rem] border border-white/5 shadow-xl">
+                <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-4">Alcance Global</p>
+                <div className="text-5xl font-black text-amber-500">{totalPlays}</div>
+                <p className="text-xs text-slate-400 mt-2 italic">Total de reproduções em tempo real</p>
               </div>
-              <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700">
-                <p className="text-slate-400 text-sm mb-1 uppercase font-bold tracking-wider">Total de Downloads</p>
-                <h4 className="text-4xl font-black text-emerald-400">{totalDownloads}</h4>
+              <div className="bg-slate-900 p-8 rounded-[2rem] border border-white/5 shadow-xl">
+                <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-4">Conversão de Download</p>
+                <div className="text-5xl font-black text-white">{totalDownloads}</div>
+                <p className="text-xs text-slate-400 mt-2 italic">Baixados para escuta offline</p>
+              </div>
+              <div className="bg-slate-900 p-8 rounded-[2rem] border border-white/5 shadow-xl">
+                <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-4">Engajamento Médio</p>
+                <div className="text-5xl font-black text-slate-400">{(totalPlays / (songs.length || 1)).toFixed(1)}</div>
+                <p className="text-xs text-slate-400 mt-2 italic">Plays por track ativa</p>
               </div>
             </div>
-            <section className="bg-slate-800 p-6 rounded-2xl border border-slate-700">
-              <h3 className="text-lg font-bold mb-4">Rank de Popularidade</h3>
-              <div className="space-y-4">
-                {[...songs].sort((a, b) => (b.plays + b.downloads) - (a.plays + a.downloads)).slice(0, 5).map((song, i) => (
-                  <div key={song.id} className="flex items-center justify-between p-3 bg-slate-900 rounded-xl">
-                    <div className="flex items-center gap-3">
-                      <span className="text-slate-600 font-bold w-4 text-center">{i+1}</span>
-                      <img src={song.coverUrl} className="w-10 h-10 rounded object-cover" />
-                      <div>
-                        <p className="font-medium text-sm">{song.title}</p>
-                        <p className="text-xs text-slate-500">{song.artist}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs font-bold text-slate-400 uppercase">Pontos</p>
-                      <p className="text-lg font-mono text-white">{(song.plays || 0) + (song.downloads || 0)}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
           </div>
         ) : (
-          <div className="space-y-8 max-w-2xl">
-            <section className="bg-slate-800 p-6 rounded-2xl border border-slate-700">
-              <h3 className="text-lg font-bold mb-4">Informações do Site</h3>
-              <div className="space-y-4">
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-slate-400 uppercase">Nome da Plataforma</label>
-                  <input type="text" value={settings.siteName} onChange={e => setSettings({...settings, siteName: e.target.value})} className="bg-slate-900 border border-slate-700 p-3 rounded-xl outline-none" />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+            <section className="bg-slate-900 p-8 rounded-[2rem] border border-white/5 shadow-xl">
+              <h3 className="text-xl font-black mb-8 uppercase tracking-tight text-amber-500">Identidade Visual</h3>
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-slate-500">Nome Corporativo</label>
+                  <input type="text" value={settings.siteName} onChange={e => setSettings({...settings, siteName: e.target.value})} className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:ring-1 focus:ring-amber-500" />
                 </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-slate-400 uppercase">Cor de Destaque</label>
-                  <div className="flex gap-4 items-center">
-                    <input type="color" value={settings.accentColor} onChange={e => setSettings({...settings, accentColor: e.target.value})} className="w-12 h-12 rounded bg-transparent cursor-pointer" />
-                    <span className="text-sm font-mono text-slate-300 uppercase">{settings.accentColor}</span>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-slate-500">URL do Logotipo</label>
+                  <input type="text" placeholder="https://..." value={settings.logoUrl} onChange={e => setSettings({...settings, logoUrl: e.target.value})} className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:ring-1 focus:ring-amber-500" />
+                  <p className="text-[10px] text-slate-600 italic">Deixe vazio para usar o ícone padrão.</p>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-slate-500">Cor da Marca</label>
+                  <div className="flex gap-4 items-center bg-black p-3 rounded-xl border border-white/10">
+                    <input type="color" value={settings.accentColor} onChange={e => setSettings({...settings, accentColor: e.target.value})} className="w-10 h-10 rounded-lg bg-transparent cursor-pointer border-none" />
+                    <span className="font-mono text-sm uppercase text-slate-400">{settings.accentColor}</span>
                   </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-slate-500">Texto do Rodapé (Disface)</label>
+                  <input type="text" value={settings.footerText} onChange={e => setSettings({...settings, footerText: e.target.value})} className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:ring-1 focus:ring-amber-500" />
                 </div>
               </div>
             </section>
 
-            <section className="bg-slate-800 p-6 rounded-2xl border border-slate-700">
-              <h3 className="text-lg font-bold mb-4">Destaque (Hero)</h3>
-              <div className="space-y-4">
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-slate-400 uppercase">Título Principal</label>
-                  <input type="text" value={settings.heroTitle} onChange={e => setSettings({...settings, heroTitle: e.target.value})} className="bg-slate-900 border border-slate-700 p-3 rounded-xl outline-none" />
+            <section className="bg-slate-900 p-8 rounded-[2rem] border border-white/5 shadow-xl">
+              <h3 className="text-xl font-black mb-8 uppercase tracking-tight text-amber-500">Configuração do Hero</h3>
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-slate-500">Título de Impacto</label>
+                  <input type="text" value={settings.heroTitle} onChange={e => setSettings({...settings, heroTitle: e.target.value})} className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:ring-1 focus:ring-amber-500" />
                 </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-slate-400 uppercase">Subtítulo</label>
-                  <textarea rows={3} value={settings.heroSubtitle} onChange={e => setSettings({...settings, heroSubtitle: e.target.value})} className="bg-slate-900 border border-slate-700 p-3 rounded-xl outline-none resize-none" />
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-slate-500">Subtítulo Estratégico</label>
+                  <textarea rows={3} value={settings.heroSubtitle} onChange={e => setSettings({...settings, heroSubtitle: e.target.value})} className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none resize-none focus:ring-1 focus:ring-amber-500" />
                 </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-slate-400 uppercase">URL Imagem de Fundo</label>
-                  <input type="text" value={settings.heroImageUrl} onChange={e => setSettings({...settings, heroImageUrl: e.target.value})} className="bg-slate-900 border border-slate-700 p-3 rounded-xl outline-none" />
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-slate-500">Imagem Principal (URL)</label>
+                  <input type="text" value={settings.heroImageUrl} onChange={e => setSettings({...settings, heroImageUrl: e.target.value})} className="w-full bg-black border border-white/10 p-4 rounded-xl outline-none focus:ring-1 focus:ring-amber-500" />
                 </div>
               </div>
             </section>

@@ -13,10 +13,12 @@ export interface Song {
 
 export interface SiteSettings {
   siteName: string;
+  logoUrl: string;
   heroTitle: string;
   heroSubtitle: string;
   heroImageUrl: string;
   accentColor: string;
+  footerText: string;
 }
 
 export interface PlayerState {
