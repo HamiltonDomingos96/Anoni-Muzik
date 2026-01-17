@@ -8,7 +8,7 @@ import AdminArea from './components/AdminArea';
 
 const INITIAL_SETTINGS: SiteSettings = {
   siteName: "Anoni Muzik",
-  logoUrl: "", 
+  logoUrl: "https://blogger.googleusercontent.com/img/a/AVvXsEg4m1BP6dtAZ8t2E9jAQPFoupOT63PbtaYGC0u0g9nxtCrmeSqDsAvt_7xbM_ERqkWelyfpcgYtnamzhOGYRNhISzdkl_wwJazDqiXDY_4iOxAvrFpw7BjvJ1easxS70d8uOtst7Q4d0dAgtrVhgRRydpHWDaVcCj5OoYmVGN2IIfEJ-xyACFJRsngoXoE=s358", 
   heroTitle: "A maior montra da música nacional.",
   heroSubtitle: "Distribuição anônima e gratuita. Os ritmos que movem a nossa terra em um só lugar.",
   heroImageUrl: "https://images.unsplash.com/photo-1493225255756-d9584f8606e9?q=80&w=2070&auto=format&fit=crop",
@@ -144,10 +144,8 @@ const App: React.FC = () => {
       <nav className="sticky top-0 z-40 bg-black/40 backdrop-blur-xl border-b border-white/5 px-4 md:px-8 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg" style={{ backgroundColor: settings.accentColor }}>
-              <svg className="w-6 h-6 text-slate-950" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
-              </svg>
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg overflow-hidden bg-white/5">
+              <img src={settings.logoUrl} alt="Logo" className="w-full h-full object-cover" />
             </div>
             <h1 className="text-xl md:text-2xl font-black tracking-tighter uppercase italic text-white">{settings.siteName}</h1>
           </div>

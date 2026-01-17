@@ -17,20 +17,23 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
   const [editingId, setEditingId] = useState<string | null>(null);
   const songFileInputRef = useRef<HTMLInputElement>(null);
   const heroFileInputRef = useRef<HTMLInputElement>(null);
+  const logoFileInputRef = useRef<HTMLInputElement>(null);
   
   const [newSong, setNewSong] = useState<Partial<Song>>({
     title: '', artist: '', genre: 'Rap', coverUrl: '', audioUrl: '', duration: '3:00', plays: 0, downloads: 0, likes: 0, isFeatured: false
   });
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'song' | 'hero') => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'song' | 'hero' | 'logo') => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
         if (type === 'song') {
           setNewSong({ ...newSong, coverUrl: reader.result as string });
-        } else {
+        } else if (type === 'hero') {
           setSettings({ ...settings, heroImageUrl: reader.result as string });
+        } else {
+          setSettings({ ...settings, logoUrl: reader.result as string });
         }
       };
       reader.readAsDataURL(file);
@@ -91,8 +94,8 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
       <header className="bg-slate-900/80 backdrop-blur-md border-b border-white/5 p-6 flex flex-col md:flex-row items-center justify-between gap-6 sticky top-0 z-50">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg" style={{ backgroundColor: settings.accentColor }}>
-              <span className="font-black text-slate-950 text-xs uppercase">Core</span>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg overflow-hidden bg-white/5">
+              <img src={settings.logoUrl} alt="Logo" className="w-full h-full object-cover" />
             </div>
             <h2 className="text-xl font-black uppercase tracking-tighter text-white">Anoni Admin</h2>
           </div>
@@ -360,6 +363,14 @@ const AdminArea: React.FC<AdminAreaProps> = ({ songs, setSongs, settings, setSet
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2"><label className="text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1">Cor de Destaque</label><div className="flex gap-4 items-center bg-black/40 p-3 rounded-2xl border border-white/5"><input type="color" value={settings.accentColor} onChange={e => setSettings({...settings, accentColor: e.target.value})} className="w-12 h-12 rounded-xl bg-transparent border-none cursor-pointer" /><span className="text-xs font-mono font-bold uppercase">{settings.accentColor}</span></div></div>
                   <div className="space-y-2"><label className="text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1">Cor de Fundo</label><div className="flex gap-4 items-center bg-black/40 p-3 rounded-2xl border border-white/5"><input type="color" value={settings.backgroundColor} onChange={e => setSettings({...settings, backgroundColor: e.target.value})} className="w-12 h-12 rounded-xl bg-transparent border-none cursor-pointer" /><span className="text-xs font-mono font-bold uppercase">{settings.backgroundColor}</span></div></div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1">Logotipo da Plataforma</label>
+                  <div onClick={() => logoFileInputRef.current?.click()} className="w-full h-32 bg-black border-2 border-dashed border-white/10 rounded-[2rem] overflow-hidden relative group cursor-pointer flex items-center justify-center">
+                    <img src={settings.logoUrl} className="max-w-full max-h-full object-contain p-4 transition-transform duration-700 group-hover:scale-110" alt="Logo Preview" />
+                    <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><svg className="w-8 h-8 text-white mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg><span className="text-[10px] font-black uppercase tracking-widest">Alterar Logotipo</span></div>
+                  </div>
+                  <input type="file" ref={logoFileInputRef} onChange={(e) => handleImageUpload(e, 'logo')} accept="image/*" className="hidden" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1">Capa do Cartaz (Hero Image)</label>
