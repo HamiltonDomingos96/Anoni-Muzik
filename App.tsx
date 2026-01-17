@@ -111,6 +111,10 @@ const App: React.FC = () => {
     return manualFeatured.length > 0 ? manualFeatured : [...songs].sort((a, b) => b.plays - a.plays).slice(0, 6);
   }, [songs]);
 
+  const top10Songs = useMemo(() => {
+    return [...songs].sort((a, b) => (b.plays || 0) - (a.plays || 0)).slice(0, 10);
+  }, [songs]);
+
   const filteredSongs = useMemo(() => {
     return songs.filter(song => 
       song.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -172,7 +176,7 @@ const App: React.FC = () => {
         </div>
       </nav>
 
-      {/* MENU LATERAL - CATEGORIAS ORGANIZADAS + ACESSO DISFARÇADO */}
+      {/* MENU LATERAL */}
       {showMenu && (
         <div className="fixed inset-0 z-[60] flex justify-end">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowMenu(false)} />
@@ -193,7 +197,6 @@ const App: React.FC = () => {
                   {cat}
                 </button>
               ))}
-              {/* ACESSO DISFARÇADO NO MENU */}
               <button 
                 onClick={() => { setShowMenu(false); setShowLoginModal(true); }}
                 className="block w-full text-left text-xl font-black text-white/5 hover:text-white/20 transition-colors uppercase italic py-2 mt-4"
@@ -215,7 +218,7 @@ const App: React.FC = () => {
       {/* LOGIN MODAL */}
       {showLoginModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-3xl p-4">
-          <div className="bg-slate-900 border border-white/10 p-10 rounded-[3rem] w-full max-sm shadow-2xl relative overflow-hidden">
+          <div className="bg-slate-900 border border-white/10 p-10 rounded-[3rem] w-full max-w-sm shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: settings.accentColor }} />
             <h3 className="text-lg font-black mb-8 text-center tracking-widest uppercase text-white/50">Área Reservada</h3>
             <form onSubmit={handleAdminLogin} className="space-y-6">
@@ -264,26 +267,45 @@ const App: React.FC = () => {
           </div>
         </section>
 
-        {/* FILTROS GÊNEROS (Atalho) */}
-        <div className="flex gap-3 mb-8 overflow-x-auto pb-2 no-scrollbar">
-          {CATEGORIES.map((cat) => (
-            <button 
-              key={cat}
-              onClick={() => setSearchQuery(cat === 'Todos' ? '' : cat)}
-              className={`whitespace-nowrap px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                (searchQuery === cat || (cat === 'Todos' && searchQuery === '')) 
-                ? 'text-black shadow-lg' : 'bg-slate-900/50 text-slate-500 border border-white/5 hover:text-white'
-              }`}
-              style={{ backgroundColor: (searchQuery === cat || (cat === 'Todos' && searchQuery === '')) ? settings.accentColor : undefined }}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
+        {/* TOP 10 RANKING */}
+        <section className="mb-16 bg-slate-900/30 p-8 rounded-[2rem] border border-white/5">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-2 h-8 rounded-full bg-amber-500" />
+            <h3 className="text-2xl font-black tracking-tight uppercase text-white">Top 10</h3>
+          </div>
+          <div className="flex flex-col gap-3">
+            {top10Songs.map((song, idx) => (
+              <div 
+                key={song.id} 
+                onClick={() => handlePlaySong(song)}
+                className="flex items-center gap-4 bg-black/20 hover:bg-white/5 p-4 rounded-2xl border border-white/5 cursor-pointer transition-all group"
+              >
+                <span className={`w-8 text-center text-2xl font-black italic ${idx < 3 ? 'text-amber-500' : 'text-slate-600'}`}>{idx + 1}</span>
+                <img src={song.coverUrl} alt="" className="w-12 h-12 rounded-xl object-cover shadow-lg" />
+                <div className="flex-1 min-w-0">
+                   <h4 className="text-sm font-black text-white uppercase truncate">{song.title}</h4>
+                   <p className="text-[10px] font-bold text-slate-500 uppercase truncate">{song.artist}</p>
+                </div>
+                <div className="text-right flex items-center gap-4">
+                   <div className="hidden md:block">
+                     <span className="text-[10px] font-black text-amber-500 uppercase">{song.plays} Plays</span>
+                   </div>
+                   <button className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white group-hover:bg-amber-500 group-hover:text-black transition-all">
+                      <svg className="w-5 h-5 ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                   </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
 
-        {/* GRADE DE MÚSICAS */}
+        {/* GRADE DE TODAS AS MÚSICAS */}
         <section className="mb-20">
-          <div className="grid grid-cols-2 gap-4 md:gap-8">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-2 h-8 rounded-full" style={{ backgroundColor: settings.accentColor }} />
+            <h3 className="text-2xl font-black tracking-tight uppercase text-white">Lançamentos</h3>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
             {filteredSongs.map(song => (
               <div key={song.id} id={`song-card-${song.id}`}>
                 <MusicCard 
@@ -298,18 +320,54 @@ const App: React.FC = () => {
             ))}
           </div>
         </section>
+
+        {/* SOCIAL WINDOWS */}
+        <section className="mb-20 space-y-12">
+          {/* YOUTUBE WINDOW */}
+          <div className="bg-slate-900 border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl">
+            <div className="p-6 bg-red-600 flex items-center gap-3">
+              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+              <h3 className="font-black uppercase tracking-widest text-white text-sm">YouTube Channel</h3>
+            </div>
+            <div className="aspect-video w-full">
+              <iframe 
+                src="https://www.youtube.com/embed?listType=user_uploads&list=anonimuzik96" 
+                className="w-full h-full border-none" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowFullScreen
+              ></iframe>
+            </div>
+          </div>
+
+          {/* FACEBOOK WINDOW */}
+          <div className="bg-slate-900 border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl">
+            <div className="p-6 bg-[#1877F2] flex items-center gap-3">
+              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+              <h3 className="font-black uppercase tracking-widest text-white text-sm">Facebook Page</h3>
+            </div>
+            <div className="w-full h-[500px]">
+              <iframe 
+                src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2FAnonimuzik&tabs=timeline&width=500&height=500&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId" 
+                width="100%" 
+                height="500" 
+                style={{ border: 'none', overflow: 'hidden' }} 
+                scrolling="no" 
+                frameBorder="0" 
+                allowFullScreen={true} 
+                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+              ></iframe>
+            </div>
+          </div>
+        </section>
       </main>
 
       {/* FOOTER */}
       <footer className="py-20 border-t border-white/5 bg-black/20 flex flex-col items-center gap-10">
         <div className="flex items-center gap-4">
-          <a href="#" className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center hover:scale-110 transition-transform group">
-            <svg className="w-6 h-6 text-slate-500 group-hover:text-white" fill="currentColor" viewBox="0 0 24 24" style={{ color: settings.accentColor }}><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-          </a>
-          <a href="#" className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center hover:scale-110 transition-transform group">
+          <a href="https://www.facebook.com/Anonimuzik" target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center hover:scale-110 transition-transform group">
             <svg className="w-6 h-6 text-slate-500 group-hover:text-white" fill="currentColor" viewBox="0 0 24 24" style={{ color: settings.accentColor }}><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
           </a>
-          <a href="#" className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center hover:scale-110 transition-transform group">
+          <a href="https://youtube.com/@anonimuzik96" target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center hover:scale-110 transition-transform group">
              <svg className="w-6 h-6 text-slate-500 group-hover:text-white" fill="currentColor" viewBox="0 0 24 24" style={{ color: settings.accentColor }}><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
           </a>
         </div>
