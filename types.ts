@@ -20,8 +20,11 @@ export interface SiteSettings {
   heroSubtitle: string;
   heroImageUrl: string;
   accentColor: string;
-  backgroundColor: string; // Nova propriedade para o fundo do site
+  backgroundColor: string;
   footerText: string;
+  heroButtonText: string;
+  heroButtonUrl: string;
+  heroButtonColor: string;
 }
 
 export interface PlayerState {

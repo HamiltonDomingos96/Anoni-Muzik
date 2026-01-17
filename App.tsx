@@ -14,7 +14,10 @@ const INITIAL_SETTINGS: SiteSettings = {
   heroImageUrl: "https://images.unsplash.com/photo-1493225255756-d9584f8606e9?q=80&w=2070&auto=format&fit=crop",
   accentColor: "#f59e0b",
   backgroundColor: "#020617",
-  footerText: "site created por Hamilton Almeida Domingos"
+  footerText: "site created por Hamilton Almeida Domingos",
+  heroButtonText: "Enviar minha música",
+  heroButtonUrl: "https://wa.me/244956953439",
+  heroButtonColor: "#f59e0b"
 };
 
 const CATEGORIES = ['Todos', 'Rap', 'Kuduro', 'Afro House', 'Semba', 'Kizomba', 'Zouk'];
@@ -43,7 +46,12 @@ const App: React.FC = () => {
 
   const [settings, setSettings] = useState<SiteSettings>(() => {
     const saved = localStorage.getItem('anoni_settings');
-    return saved ? JSON.parse(saved) : INITIAL_SETTINGS;
+    const base = saved ? JSON.parse(saved) : INITIAL_SETTINGS;
+    // Ensure new fields exist if coming from old storage
+    return {
+      ...INITIAL_SETTINGS,
+      ...base
+    };
   });
   
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
@@ -234,11 +242,25 @@ const App: React.FC = () => {
 
       {/* CONTEÚDO PRINCIPAL */}
       <main className="max-w-7xl mx-auto w-full p-4 md:p-8 flex-grow">
-        <section className="mb-12 rounded-[2.5rem] overflow-hidden relative min-h-[300px] md:min-h-[400px] flex items-end p-6 md:p-12 shadow-2xl border border-white/5">
+        <section className="mb-12 rounded-[2.5rem] overflow-hidden relative min-h-[300px] md:min-h-[500px] flex items-end p-6 md:p-12 shadow-2xl border border-white/5">
           <img src={settings.heroImageUrl} alt="Hero" className="absolute inset-0 object-cover w-full h-full brightness-[0.3]" />
           <div className="relative z-10 max-w-3xl">
             <h2 className="text-3xl md:text-6xl font-black text-white mb-6 leading-[0.9] tracking-tighter">{settings.heroTitle}</h2>
             <p className="text-slate-300 text-base md:text-xl mb-8 max-w-xl font-medium leading-relaxed">{settings.heroSubtitle}</p>
+            
+            {/* NOVO BOTÃO DA CAPA */}
+            <a 
+              href={settings.heroButtonUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-3 px-8 md:px-12 py-4 md:py-5 rounded-2xl font-black uppercase text-xs md:text-sm tracking-widest text-slate-950 transition-all hover:scale-105 active:scale-95 shadow-2xl shadow-black/50"
+              style={{ backgroundColor: settings.heroButtonColor }}
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.025 3.107l-.696 2.54 2.597-.681c.812.479 1.762.774 2.842.774 3.18 0 5.765-2.587 5.767-5.766 0-3.181-2.586-5.766-5.767-5.766zm3.39 8.122c-.146.411-.741.745-1.018.793-.271.047-.604.083-1.028-.052-.25-.08-.558-.198-.958-.372-1.706-.743-2.812-2.482-2.898-2.596-.086-.115-.694-.922-.694-1.762s.434-1.253.59-1.424c.156-.171.339-.214.451-.214.113 0 .226.001.325.006.104.005.244-.039.382.293.142.342.486 1.185.528 1.27.042.086.071.185.014.298-.057.113-.085.185-.17.284-.085.099-.178.22-.254.295-.085.084-.173.175-.075.344.099.169.438.723.94 1.168.647.573 1.192.75 1.361.835.169.085.268.071.369-.043.1-.113.434-.504.55-.675.116-.171.233-.142.395-.083.162.06.842.397.986.469.144.072.24.108.275.167.036.059.036.342-.11.753z" />
+              </svg>
+              {settings.heroButtonText}
+            </a>
           </div>
         </section>
 
