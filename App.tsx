@@ -14,7 +14,7 @@ const INITIAL_SETTINGS: SiteSettings = {
   heroImageUrl: "https://images.unsplash.com/photo-1493225255756-d9584f8606e9?q=80&w=2070&auto=format&fit=crop",
   accentColor: "#f59e0b",
   backgroundColor: "#020617",
-  footerText: "site criado por Hamilton Almeida Domingos"
+  footerText: "site created por Hamilton Almeida Domingos"
 };
 
 const CATEGORIES = ['Todos', 'Rap', 'Kuduro', 'Afro House', 'Semba', 'Kizomba', 'Zouk'];
@@ -172,27 +172,40 @@ const App: React.FC = () => {
         </div>
       </nav>
 
-      {/* MENU LATERAL */}
+      {/* MENU LATERAL - CATEGORIAS ORGANIZADAS + ACESSO DISFARÇADO */}
       {showMenu && (
         <div className="fixed inset-0 z-[60] flex justify-end">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowMenu(false)} />
           <div className="relative w-80 h-full bg-slate-900 shadow-2xl animate-in slide-in-from-right duration-300 p-8 flex flex-col">
             <div className="flex justify-between items-center mb-12">
-              <span className="font-black uppercase tracking-widest text-xs text-slate-500">Menu Navegação</span>
+              <span className="font-black uppercase tracking-widest text-xs text-slate-500">Categorias de Ritmo</span>
               <button onClick={() => setShowMenu(false)} className="text-white hover:rotate-90 transition-transform">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} /></svg>
               </button>
             </div>
-            <nav className="space-y-6">
-              <button onClick={() => { setSearchQuery(''); setShowMenu(false); }} className="block w-full text-left text-2xl font-black text-white hover:text-amber-500 transition-colors uppercase italic">Início</button>
-              <button onClick={() => { setShowMenu(false); }} className="block w-full text-left text-2xl font-black text-white hover:text-amber-500 transition-colors uppercase italic">Explorar</button>
-              <button onClick={() => { setShowLoginModal(true); setShowMenu(false); }} className="block w-full text-left text-2xl font-black text-white hover:text-amber-500 transition-colors uppercase italic">Administração</button>
+            <nav className="space-y-4">
+              {CATEGORIES.map((cat) => (
+                <button 
+                  key={cat}
+                  onClick={() => { setSearchQuery(cat === 'Todos' ? '' : cat); setShowMenu(false); }} 
+                  className="block w-full text-left text-xl font-black text-white hover:text-amber-500 transition-colors uppercase italic py-2 border-b border-white/5"
+                >
+                  {cat}
+                </button>
+              ))}
+              {/* ACESSO DISFARÇADO NO MENU */}
+              <button 
+                onClick={() => { setShowMenu(false); setShowLoginModal(true); }}
+                className="block w-full text-left text-xl font-black text-white/5 hover:text-white/20 transition-colors uppercase italic py-2 mt-4"
+              >
+                HD
+              </button>
             </nav>
             <div className="mt-auto border-t border-white/5 pt-8">
-              <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-4">Siga-nos</p>
+              <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-4">Siga o Movimento</p>
               <div className="flex gap-4">
-                <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-white" style={{ color: settings.accentColor }}>Insta</div>
-                <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-white" style={{ color: settings.accentColor }}>FB</div>
+                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white" style={{ color: settings.accentColor }}>IG</div>
+                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white" style={{ color: settings.accentColor }}>YT</div>
               </div>
             </div>
           </div>
@@ -202,17 +215,17 @@ const App: React.FC = () => {
       {/* LOGIN MODAL */}
       {showLoginModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-3xl p-4">
-          <div className="bg-slate-900 border border-white/10 p-10 rounded-[3rem] w-full max-w-sm shadow-2xl relative overflow-hidden">
+          <div className="bg-slate-900 border border-white/10 p-10 rounded-[3rem] w-full max-sm shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: settings.accentColor }} />
-            <h3 className="text-lg font-black mb-8 text-center tracking-widest uppercase text-white/50">Acesso Restrito</h3>
+            <h3 className="text-lg font-black mb-8 text-center tracking-widest uppercase text-white/50">Área Reservada</h3>
             <form onSubmit={handleAdminLogin} className="space-y-6">
               <input 
                 type="password" placeholder="SENHA" autoFocus value={passwordInput} onChange={(e) => setPasswordInput(e.target.value)}
                 className="w-full bg-black/40 border border-white/10 p-5 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all text-center tracking-[0.5em] font-black text-2xl text-white"
               />
-              {loginError && <p className="text-red-500 text-[10px] font-black uppercase text-center">Senha Incorreta</p>}
-              <button type="submit" className="w-full bg-white text-black font-black py-4 rounded-2xl uppercase text-[10px] tracking-widest hover:bg-amber-500 transition-all">Entrar</button>
-              <button type="button" onClick={() => setShowLoginModal(false)} className="w-full text-slate-500 text-[10px] font-black uppercase">Voltar</button>
+              {loginError && <p className="text-red-500 text-[10px] font-black uppercase text-center">Acesso Negado</p>}
+              <button type="submit" className="w-full bg-white text-black font-black py-4 rounded-2xl uppercase text-[10px] tracking-widest hover:bg-amber-500 transition-all">Validar</button>
+              <button type="button" onClick={() => setShowLoginModal(false)} className="w-full text-slate-500 text-[10px] font-black uppercase">Fechar</button>
             </form>
           </div>
         </div>
@@ -251,7 +264,7 @@ const App: React.FC = () => {
           </div>
         </section>
 
-        {/* FILTROS GÊNEROS */}
+        {/* FILTROS GÊNEROS (Atalho) */}
         <div className="flex gap-3 mb-8 overflow-x-auto pb-2 no-scrollbar">
           {CATEGORIES.map((cat) => (
             <button 
@@ -287,7 +300,7 @@ const App: React.FC = () => {
         </section>
       </main>
 
-      {/* FOOTER COM REDES SOCIAIS */}
+      {/* FOOTER */}
       <footer className="py-20 border-t border-white/5 bg-black/20 flex flex-col items-center gap-10">
         <div className="flex items-center gap-4">
           <a href="#" className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center hover:scale-110 transition-transform group">
