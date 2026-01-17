@@ -268,7 +268,7 @@ const App: React.FC = () => {
         <section className="mb-16">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-2 h-8 rounded-full" style={{ backgroundColor: settings.accentColor }} />
-            <h3 className="text-2xl font-black tracking-tight uppercase text-white">Mais Quentes</h3>
+            <h3 className="text-2xl font-black tracking-tight uppercase text-white">Música em destaque</h3>
           </div>
           <div className="flex gap-4 md:gap-6 overflow-x-auto pb-6 snap-x no-scrollbar">
             {trendingSongs.map((song) => (
